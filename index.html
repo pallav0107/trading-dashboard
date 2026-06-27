@@ -58,13 +58,15 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 
 <div class="panel" id="panel-bot">
   <h2>Live Trading Bot</h2>
-  <p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades.</p>
+  <p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades with live unrealized P/L.</p>
   <div class="grid" id="botstats"></div>
-  <table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Entry</th></tr></thead><tbody></tbody></table>
+  <table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Qty</th><th class="r">Entry</th><th class="r">Last</th><th class="r">P/L $</th><th class="r">P/L %</th></tr></thead><tbody></tbody></table>
   <div class="gloss">
     <div><b>What the terms mean</b></div>
     <div><b>Total Equity:</b> the combined account value across all five venues.</div>
-    <div><b>P&amp;L Today / 7d:</b> realized profit or loss over those windows.</div>
+    <div><b>P&amp;L Today / 7d:</b> realized profit or loss over those windows (closed trades).</div>
+    <div><b>Open P/L:</b> the unrealized profit/loss on positions still held right now.</div>
+    <div><b>P/L $ / %:</b> per-position unrealized gain/loss since entry (live, marked to last price).</div>
     <div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
   </div>
 </div>
@@ -83,19 +85,23 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
 const f=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
 const f2=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 const sign=n=>n==null?"":(n>=0?"grn":"red");
+const plc=n=>n==null?"–":(n>=0?"+":"")+f(n);
+const plp=n=>n==null?"–":(n>=0?"+":"")+f2(n)+"%";
 const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
 function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
 async function load(){
  const [bs,bp,ms,mg,mt]=await Promise.all([get("bot_status"),get("bot_positions"),get("moonshot_status"),get("moonshot_gold"),get("moonshot_tickers")]);
  const b=(bs&&bs[0])||{};
  let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
+ const openpl=(bp||[]).reduce((s,p)=>s+(p.pl||0),0);
  let h=card("Total Equity","$"+f(b.total_equity));
  h+=card("P&L Today","$"+f(b.pnl_today),sign(b.pnl_today));
  h+=card("P&L 7d","$"+f(b.pnl_7d),sign(b.pnl_7d));
+ h+=card("Open P/L (unrealized)",plc(openpl),sign(openpl));
  h+=card("Futures Gate",b.futures_gate||"–");
  for(const [k,v] of Object.entries(bal)){h+=card(k,"$"+f(v))}
  document.getElementById("botstats").innerHTML=h;
- document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.entry)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no open positions</td></tr>`;
+ document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
  document.getElementById("msverdict").innerHTML=m.verdict?`<div class="verdict"><b>Verdict:</b> ${m.verdict}</div>`:"";
  document.getElementById("msstats").innerHTML=card("Bronze days",f(m.bronze_days))+card("Silver rows",f(m.silver_rows))+card("Gold candidates",f(m.gold_candidates))+card("As of",m.as_of||"–");
