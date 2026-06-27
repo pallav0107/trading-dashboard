@@ -67,6 +67,8 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
   <p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades with live unrealized P/L.</p>
   <div class="grid" id="botstats"></div>
   <table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Qty</th><th class="r">Entry</th><th class="r">Last</th><th class="r">P/L $</th><th class="r">P/L %</th></tr></thead><tbody></tbody></table>
+  <div class="muted" style="margin-top:16px;font-size:12.5px"><b style="color:#c4cfde">Peak-guard — weekly +10% target</b> (banks gains at +10%/wk, halts new risk if a venue gives back &gt;4% from its weekly peak):</div>
+  <table id="botguards"><thead><tr><th>Venue</th><th class="r">Weekly P/L</th><th class="r">From peak</th><th>Status</th></tr></thead><tbody></tbody></table>
   <div class="gloss">
     <div><b>What the terms mean</b></div>
     <div><b>Total Equity:</b> the combined account value across all five venues.</div>
@@ -74,6 +76,7 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
     <div><b>Open P/L:</b> the unrealized profit/loss on positions still held right now.</div>
     <div><b>P/L $ / %:</b> per-position unrealized gain/loss since entry (live, marked to last price).</div>
     <div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
+    <div><b>Peak-guard:</b> per-venue weekly discipline — once a venue is up +10% on the week it banks the gain (no new risk until the week resets), and if it gives back &gt;4% from its weekly peak it halts new entries. It only blocks opening new positions; existing ones are still managed. Protects run-ups; it can't manufacture returns.</div>
   </div>
 </div>
 
@@ -107,6 +110,14 @@ async function load(){
  h+=card("Futures Gate",b.futures_gate||"–");
  for(const [k,v] of Object.entries(bal)){h+=card(k,"$"+f(v))}
  document.getElementById("botstats").innerHTML=h;
+ let g=b.guards||{}; if(typeof g==="string"){try{g=JSON.parse(g)}catch(e){g={}}}
+ const vmap={alpaca:"Stocks / Options",binance_spot:"Crypto spot",binance_futures:"Futures",oanda:"FX"};
+ const gh=Object.entries(g).map(([k,v])=>{
+   const wr=v.weekly_return||0, dd=v.drawdown_from_peak||0;
+   const st=v.locked?'<span class="red">LOCKED</span>':'<span class="grn">active</span>';
+   return `<tr><td>${vmap[k]||k}</td><td class="r ${sign(wr)}">${(wr>=0?'+':'')+(wr*100).toFixed(1)}%</td><td class="r ${dd<0?'red':'muted'}">${(dd*100).toFixed(1)}%</td><td>${st}</td></tr>`;
+ }).join("");
+ document.querySelector("#botguards tbody").innerHTML=gh||`<tr><td colspan=4 class=muted>initializing — populates after each venue's next scan</td></tr>`;
  document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
  const cand=(mg||[]).map(g=>g.ticker);
