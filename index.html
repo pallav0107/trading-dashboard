@@ -6,9 +6,13 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
 .wrap{max-width:1100px;margin:0 auto;padding:20px}
 h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);font-size:12px;margin-bottom:14px}
-.intro{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;color:#c4cfde;margin-bottom:8px}
-h2{font-size:15px;margin:26px 0 6px;color:var(--acc);border-bottom:1px solid var(--bd);padding-bottom:6px}
-.desc{color:var(--mut);font-size:12.5px;margin:0 0 12px}
+.intro{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;color:#c4cfde;margin-bottom:16px}
+.tabs{display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--bd)}
+.tab{background:none;border:none;color:var(--mut);font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:var(--fg)}.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
+.panel{display:none}.panel.active{display:block}
+h2{font-size:15px;margin:8px 0 6px;color:var(--acc)}
+.desc{color:var(--mut);font-size:12.5px;margin:0 0 14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
 .k{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
@@ -19,37 +23,50 @@ th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--bd);font-si
 th{color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase}
 td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;background:#1f2733}
 .muted{color:var(--mut)}.verdict{background:#2a1417;border:1px solid #5c1f22;color:#ffb4ad;border-radius:8px;padding:10px 12px;font-size:13px}
-.gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:14px}
+.gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:18px}
 .gloss b{color:#c4cfde}.gloss div{margin:4px 0}
 .foot{color:var(--mut);font-size:11px;margin-top:24px;text-align:center}
 </style></head><body><div class="wrap">
 <h1>Trading + Moonshot Dashboard</h1>
 <div class="sub" id="stamp">loading…</div>
-<div class="intro">A live view of two systems: an <b>autonomous trading bot</b> running real &amp; test money across five markets, and <b>Moonshot</b>, a research project testing whether cheap options can predict explosive price moves. This page reads live data and refreshes itself every minute. Nothing here is financial advice.</div>
+<div class="intro">A live view of two systems: <b>Moonshot</b>, a research project testing whether cheap options can predict explosive price moves, and an <b>autonomous trading bot</b> running real &amp; test money across five markets. This page reads live data and refreshes itself every minute. Nothing here is financial advice.</div>
 
-<h2>🤖 Live Trading Bot</h2>
-<p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades.</p>
-<div class="grid" id="botstats"></div>
-<table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Entry</th></tr></thead><tbody></tbody></table>
+<div class="tabs">
+  <button class="tab active" data-tab="moon">🌙 Moonshot</button>
+  <button class="tab" data-tab="bot">🤖 Trading Bot</button>
+</div>
 
-<h2>🌙 Moonshot — Convexity Research</h2>
-<p class="desc">A research sleeve asking one question: can we spot, ahead of time, a stock about to move <i>far more</i> than the options market expects (an explosive / "black-swan" move)? It is <b>research only — not trading real money</b>. Every signal must beat the market's own implied probability on out-of-sample data before it could ever be funded.</p>
-<div id="msverdict"></div>
-<div class="grid" id="msstats" style="margin-top:12px"></div>
-<div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Explosive candidates</b> — tickers the model flags as more likely than usual to make an outsized move (shown only if they clear the edge bar):</div>
-<table id="msgold"><thead><tr><th>Candidate</th><th class="r">P(explosive)</th><th class="r">Score</th><th class="r">IV rank</th></tr></thead><tbody></tbody></table>
-<div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Current options state</b> — the latest reading per tracked ticker:</div>
-<table id="mstick"><thead><tr><th>Ticker</th><th>As of</th><th class="r">ATM IV</th><th class="r">IV rank</th><th class="r">GEX</th></tr></thead><tbody></tbody></table>
+<div class="panel active" id="panel-moon">
+  <h2>Moonshot — Convexity Research</h2>
+  <p class="desc">A research sleeve asking one question: can we spot, ahead of time, a stock about to move <i>far more</i> than the options market expects (an explosive / "black-swan" move)? It is <b>research only — not trading real money</b>. Every signal must beat the market's own implied probability on out-of-sample data before it could ever be funded.</p>
+  <div id="msverdict"></div>
+  <div class="grid" id="msstats" style="margin-top:12px"></div>
+  <div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Explosive candidates</b> — tickers the model flags as more likely than usual to make an outsized move (shown only if they clear the edge bar):</div>
+  <table id="msgold"><thead><tr><th>Candidate</th><th class="r">P(explosive)</th><th class="r">Score</th><th class="r">IV rank</th></tr></thead><tbody></tbody></table>
+  <div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Current options state</b> — the latest reading per tracked ticker:</div>
+  <table id="mstick"><thead><tr><th>Ticker</th><th>As of</th><th class="r">ATM IV</th><th class="r">IV rank</th><th class="r">GEX</th></tr></thead><tbody></tbody></table>
+  <div class="gloss">
+    <div><b>What the terms mean</b></div>
+    <div><b>Verdict:</b> the research system's honest call — does the convexity signal have a real, tradeable edge, or is the market priced fairly?</div>
+    <div><b>Bronze / Silver / Gold:</b> the data pipeline stages — raw captured data → cleaned &amp; labelled features → the ranked shortlist of explosive candidates.</div>
+    <div><b>P(explosive):</b> model-estimated probability a ticker makes an outsized move before its options expire.</div>
+    <div><b>ATM IV:</b> at-the-money implied volatility — how big a move the options market is pricing in.</div>
+    <div><b>IV rank:</b> where today's IV sits versus its own history (0 = cheapest in range, 1 = most expensive).</div>
+    <div><b>GEX:</b> gamma exposure — dealer option positioning that can dampen (positive) or amplify (negative) price moves.</div>
+  </div>
+</div>
 
-<div class="gloss">
-<div><b>What the terms mean</b></div>
-<div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
-<div><b>Verdict:</b> the research system's honest call — does the convexity signal have a real, tradeable edge, or is the market priced fairly?</div>
-<div><b>Bronze / Silver / Gold:</b> the data pipeline stages — raw captured data → cleaned &amp; labelled features → the ranked shortlist of explosive candidates.</div>
-<div><b>P(explosive):</b> model-estimated probability a ticker makes an outsized move before its options expire.</div>
-<div><b>ATM IV:</b> at-the-money implied volatility — how big a move the options market is pricing in.</div>
-<div><b>IV rank:</b> where today's IV sits versus its own history (0 = cheapest in range, 1 = most expensive).</div>
-<div><b>GEX:</b> gamma exposure — dealer option positioning that can dampen (positive) or amplify (negative) price moves.</div>
+<div class="panel" id="panel-bot">
+  <h2>Live Trading Bot</h2>
+  <p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades.</p>
+  <div class="grid" id="botstats"></div>
+  <table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Entry</th></tr></thead><tbody></tbody></table>
+  <div class="gloss">
+    <div><b>What the terms mean</b></div>
+    <div><b>Total Equity:</b> the combined account value across all five venues.</div>
+    <div><b>P&amp;L Today / 7d:</b> realized profit or loss over those windows.</div>
+    <div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
+  </div>
 </div>
 
 <div class="foot">auto-refreshes every 60s · live data via Supabase · the bot trades real &amp; test capital, Moonshot is research only</div>
@@ -58,6 +75,11 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 const URL="https://adamrkuhkooygjngqkqh.supabase.co";
 const KEY="sb_publishable_U04JOYhi8RrxXBLt5P9tqg_PKj6ZxOA";
 const H={apikey:KEY,Authorization:"Bearer "+KEY};
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");document.getElementById("panel-"+t.dataset.tab).classList.add("active");
+});
 const f=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
 const f2=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 const sign=n=>n==null?"":(n>=0?"grn":"red");
