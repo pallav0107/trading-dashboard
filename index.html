@@ -83,7 +83,7 @@ const plp=n=>n==null?"–":(n>=0?"+":"")+f2(n)+"%";
 const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
 function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
 async function load(){
- const [bs,bp,ms]=await Promise.all([get("bot_status"),get("bot_positions"),get("moonshot_status")]);
+ const [bs,bp,ms]=await Promise.all([get("bot_status"),get("bot_positions"),get("research_status")]);
  const b=(bs&&bs[0])||{};
  let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
  const openpl=(bp||[]).reduce((s,p)=>s+(p.pl||0),0);
@@ -104,7 +104,7 @@ async function load(){
  document.querySelector("#botguards tbody").innerHTML=gh||`<tr><td colspan=4 class=muted>initializing — populates after each venue's next scan</td></tr>`;
  document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
- document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.bronze_days)+" d")+card("Signals processed",f(m.silver_rows))+card("Status",m.verdict||"Monitoring");
+ document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.data_days)+" d")+card("Signals processed",f(m.signals))+card("Status",m.status||"Monitoring");
  document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
 }
 load();setInterval(load,60000);
