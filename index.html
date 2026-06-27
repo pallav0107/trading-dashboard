@@ -33,33 +33,17 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 </style></head><body><div class="wrap">
 <h1>Trading + Moonshot Dashboard</h1>
 <div class="sub" id="stamp">loading…</div>
-<div class="intro">A live view of two systems: <b>Moonshot</b>, a research project testing whether cheap options can predict explosive price moves, and an <b>autonomous trading bot</b> running real &amp; test money across five markets. This page reads live data and refreshes itself every minute. Nothing here is financial advice.</div>
+<div class="intro">A live operations view of an <b>autonomous trading system</b> running across five markets, alongside a quantitative <b>research engine</b>. Live data, refreshed every minute. Proprietary methods and signals are not disclosed. Nothing here is financial advice.</div>
 
 <div class="tabs">
-  <button class="tab active" data-tab="moon">🌙 Moonshot</button>
+  <button class="tab active" data-tab="moon">🔬 Research</button>
   <button class="tab" data-tab="bot">🤖 Trading Bot</button>
 </div>
 
 <div class="panel active" id="panel-moon">
-  <h2>Moonshot — Convexity Research</h2>
-  <p class="desc">A research sleeve asking one question: can we spot, ahead of time, a stock about to move <i>far more</i> than the options market expects (an explosive / "black-swan" move)? It is <b>research only — not trading real money</b>. Every signal must beat the market's own implied probability on out-of-sample data before it could ever be funded.</p>
-  <div id="msaction"></div>
-  <div id="msverdict"></div>
-  <div class="grid" id="msstats" style="margin-top:12px"></div>
-  <div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Explosive candidates</b> — tickers the model flags as more likely than usual to make an outsized move (shown only if they clear the edge bar):</div>
-  <table id="msgold"><thead><tr><th>Candidate</th><th class="r">P(explosive)</th><th class="r">Score</th><th class="r">IV rank</th></tr></thead><tbody></tbody></table>
-  <div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Current options state</b> — the latest reading per tracked ticker:</div>
-  <table id="mstick"><thead><tr><th>Ticker</th><th>As of</th><th class="r">ATM IV</th><th class="r">IV rank</th><th class="r">GEX</th></tr></thead><tbody></tbody></table>
-  <div class="gloss">
-    <div><b>What the terms mean</b></div>
-    <div><b>Recommended action:</b> the bottom-line instruction derived from the verdict — either BUY a specific convexity trade, or STAND ASIDE. Only flips to BUY when a candidate beats the market's implied odds out-of-sample.</div>
-    <div><b>Verdict:</b> the research system's honest call — does the convexity signal have a real, tradeable edge, or is the market priced fairly?</div>
-    <div><b>Bronze / Silver / Gold:</b> the data pipeline stages — raw captured data → cleaned &amp; labelled features → the ranked shortlist of explosive candidates.</div>
-    <div><b>P(explosive):</b> model-estimated probability a ticker makes an outsized move before its options expire.</div>
-    <div><b>ATM IV:</b> at-the-money implied volatility — how big a move the options market is pricing in.</div>
-    <div><b>IV rank:</b> where today's IV sits versus its own history (0 = cheapest in range, 1 = most expensive).</div>
-    <div><b>GEX:</b> gamma exposure — dealer option positioning that can dampen (positive) or amplify (negative) price moves.</div>
-  </div>
+  <h2>Research Engine</h2>
+  <p class="desc">A proprietary quantitative research pipeline that continuously ingests market data and evaluates signals. Methodology, instruments, and any candidates are confidential and not shown here.</p>
+  <div class="grid" id="msstats"></div>
 </div>
 
 <div class="panel" id="panel-bot">
@@ -99,7 +83,7 @@ const plp=n=>n==null?"–":(n>=0?"+":"")+f2(n)+"%";
 const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
 function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
 async function load(){
- const [bs,bp,ms,mg,mt]=await Promise.all([get("bot_status"),get("bot_positions"),get("moonshot_status"),get("moonshot_gold"),get("moonshot_tickers")]);
+ const [bs,bp,ms]=await Promise.all([get("bot_status"),get("bot_positions"),get("moonshot_status")]);
  const b=(bs&&bs[0])||{};
  let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
  const openpl=(bp||[]).reduce((s,p)=>s+(p.pl||0),0);
@@ -120,20 +104,7 @@ async function load(){
  document.querySelector("#botguards tbody").innerHTML=gh||`<tr><td colspan=4 class=muted>initializing — populates after each venue's next scan</td></tr>`;
  document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
- const cand=(mg||[]).map(g=>g.ticker);
- const isPass=/^\s*PASS/i.test(m.verdict||"");
- let act,acls;
- if(isPass&&cand.length){
-   act=`<b>BUY — long convexity.</b> Open a long straddle (or long at-the-money options) on: <b>${cand.join(", ")}</b>. The model rates these above the market's implied odds of an explosive move.`;acls="act-buy";
- }else{
-   act=`<b>STAND ASIDE — take no positions.</b> The research finds no tradeable edge here: buying options is negative-EV (you would lose money on average). Any tickers listed below are <b>watch-only</b>, not buy signals.`;acls="act-hold";
- }
- document.getElementById("msaction").innerHTML=`<div class="action ${acls}"><div class="k">Recommended action</div>${act}</div>`;
- document.getElementById("msverdict").innerHTML=m.verdict?`<div class="verdict"><b>Why:</b> ${m.verdict}</div>`:"";
- document.getElementById("msstats").innerHTML=card("Bronze days",f(m.bronze_days))+card("Silver rows",f(m.silver_rows))+card("Gold candidates",f(m.gold_candidates))+card("As of",m.as_of||"–");
- document.querySelector("#msgold tbody").innerHTML=(mg||[]).map(g=>`<tr><td><b>${g.ticker}</b></td><td class="r">${f2(g.p_explosive)}</td><td class="r">${f2(g.explosive_score)}</td><td class="r">${f2(g.iv_rank)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no candidates clear the edge bar — current verdict: no real edge</td></tr>`;
- const tk=(mt||[]).sort((a,b)=>(b.as_of||"").localeCompare(a.as_of||"")).slice(0,20);
- document.querySelector("#mstick tbody").innerHTML=tk.map(t=>`<tr><td>${t.ticker}</td><td class="muted">${t.as_of||''}</td><td class="r">${f2(t.atm_iv)}</td><td class="r">${f2(t.iv_rank)}</td><td class="r">${f2(t.gex)}</td></tr>`).join("");
+ document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.bronze_days)+" d")+card("Signals processed",f(m.silver_rows))+card("Status",m.verdict||"Monitoring");
  document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
 }
 load();setInterval(load,60000);
