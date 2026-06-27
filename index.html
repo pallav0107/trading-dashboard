@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trading + Moonshot Dashboard</title>
+<style>
+:root{--bg:#0b0e14;--card:#141925;--mut:#7d8aa3;--fg:#e6edf3;--grn:#3fb950;--red:#f85149;--acc:#58a6ff;--bd:#222a39}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);font-size:12px;margin-bottom:14px}
+.intro{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;color:#c4cfde;margin-bottom:8px}
+h2{font-size:15px;margin:26px 0 6px;color:var(--acc);border-bottom:1px solid var(--bd);padding-bottom:6px}
+.desc{color:var(--mut);font-size:12.5px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.k{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.v{font-size:22px;font-weight:600;margin-top:4px}
+.grn{color:var(--grn)}.red{color:var(--red)}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--bd);font-size:13px}
+th{color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase}
+td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;background:#1f2733}
+.muted{color:var(--mut)}.verdict{background:#2a1417;border:1px solid #5c1f22;color:#ffb4ad;border-radius:8px;padding:10px 12px;font-size:13px}
+.gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:14px}
+.gloss b{color:#c4cfde}.gloss div{margin:4px 0}
+.foot{color:var(--mut);font-size:11px;margin-top:24px;text-align:center}
+</style></head><body><div class="wrap">
+<h1>Trading + Moonshot Dashboard</h1>
+<div class="sub" id="stamp">loading…</div>
+<div class="intro">A live view of two systems: an <b>autonomous trading bot</b> running real &amp; test money across five markets, and <b>Moonshot</b>, a research project testing whether cheap options can predict explosive price moves. This page reads live data and refreshes itself every minute. Nothing here is financial advice.</div>
+
+<h2>🤖 Live Trading Bot</h2>
+<p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades.</p>
+<div class="grid" id="botstats"></div>
+<table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Entry</th></tr></thead><tbody></tbody></table>
+
+<h2>🌙 Moonshot — Convexity Research</h2>
+<p class="desc">A research sleeve asking one question: can we spot, ahead of time, a stock about to move <i>far more</i> than the options market expects (an explosive / "black-swan" move)? It is <b>research only — not trading real money</b>. Every signal must beat the market's own implied probability on out-of-sample data before it could ever be funded.</p>
+<div id="msverdict"></div>
+<div class="grid" id="msstats" style="margin-top:12px"></div>
+<div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Explosive candidates</b> — tickers the model flags as more likely than usual to make an outsized move (shown only if they clear the edge bar):</div>
+<table id="msgold"><thead><tr><th>Candidate</th><th class="r">P(explosive)</th><th class="r">Score</th><th class="r">IV rank</th></tr></thead><tbody></tbody></table>
+<div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Current options state</b> — the latest reading per tracked ticker:</div>
+<table id="mstick"><thead><tr><th>Ticker</th><th>As of</th><th class="r">ATM IV</th><th class="r">IV rank</th><th class="r">GEX</th></tr></thead><tbody></tbody></table>
+
+<div class="gloss">
+<div><b>What the terms mean</b></div>
+<div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
+<div><b>Verdict:</b> the research system's honest call — does the convexity signal have a real, tradeable edge, or is the market priced fairly?</div>
+<div><b>Bronze / Silver / Gold:</b> the data pipeline stages — raw captured data → cleaned &amp; labelled features → the ranked shortlist of explosive candidates.</div>
+<div><b>P(explosive):</b> model-estimated probability a ticker makes an outsized move before its options expire.</div>
+<div><b>ATM IV:</b> at-the-money implied volatility — how big a move the options market is pricing in.</div>
+<div><b>IV rank:</b> where today's IV sits versus its own history (0 = cheapest in range, 1 = most expensive).</div>
+<div><b>GEX:</b> gamma exposure — dealer option positioning that can dampen (positive) or amplify (negative) price moves.</div>
+</div>
+
+<div class="foot">auto-refreshes every 60s · live data via Supabase · the bot trades real &amp; test capital, Moonshot is research only</div>
+</div>
+<script>
+const URL="https://adamrkuhkooygjngqkqh.supabase.co";
+const KEY="sb_publishable_U04JOYhi8RrxXBLt5P9tqg_PKj6ZxOA";
+const H={apikey:KEY,Authorization:"Bearer "+KEY};
+const f=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
+const f2=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+const sign=n=>n==null?"":(n>=0?"grn":"red");
+const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
+function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
+async function load(){
+ const [bs,bp,ms,mg,mt]=await Promise.all([get("bot_status"),get("bot_positions"),get("moonshot_status"),get("moonshot_gold"),get("moonshot_tickers")]);
+ const b=(bs&&bs[0])||{};
+ let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
+ let h=card("Total Equity","$"+f(b.total_equity));
+ h+=card("P&L Today","$"+f(b.pnl_today),sign(b.pnl_today));
+ h+=card("P&L 7d","$"+f(b.pnl_7d),sign(b.pnl_7d));
+ h+=card("Futures Gate",b.futures_gate||"–");
+ for(const [k,v] of Object.entries(bal)){h+=card(k,"$"+f(v))}
+ document.getElementById("botstats").innerHTML=h;
+ document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.entry)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no open positions</td></tr>`;
+ const m=(ms&&ms[0])||{};
+ document.getElementById("msverdict").innerHTML=m.verdict?`<div class="verdict"><b>Verdict:</b> ${m.verdict}</div>`:"";
+ document.getElementById("msstats").innerHTML=card("Bronze days",f(m.bronze_days))+card("Silver rows",f(m.silver_rows))+card("Gold candidates",f(m.gold_candidates))+card("As of",m.as_of||"–");
+ document.querySelector("#msgold tbody").innerHTML=(mg||[]).map(g=>`<tr><td><b>${g.ticker}</b></td><td class="r">${f2(g.p_explosive)}</td><td class="r">${f2(g.explosive_score)}</td><td class="r">${f2(g.iv_rank)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no candidates clear the edge bar — current verdict: no real edge</td></tr>`;
+ const tk=(mt||[]).sort((a,b)=>(b.as_of||"").localeCompare(a.as_of||"")).slice(0,20);
+ document.querySelector("#mstick tbody").innerHTML=tk.map(t=>`<tr><td>${t.ticker}</td><td class="muted">${t.as_of||''}</td><td class="r">${f2(t.atm_iv)}</td><td class="r">${f2(t.iv_rank)}</td><td class="r">${f2(t.gex)}</td></tr>`).join("");
+ document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
+}
+load();setInterval(load,60000);
+</script></body></html>
