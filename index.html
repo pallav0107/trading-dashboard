@@ -48,9 +48,9 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 
 <div class="panel" id="panel-bot">
   <h2>Live Trading Bot</h2>
-  <p class="desc">An automated bot that trades five venues (US stocks &amp; options, crypto spot &amp; futures, FX) using machine-learning signals. It manages its own positions, risk, and stops. The numbers below are its current account balances, realized profit/loss, and open trades with live unrealized P/L.</p>
+  <p class="desc">An automated multi-venue trading system. <b>All capital shown is simulated</b> — paper / demo / testnet accounts, not real money. Specific instruments are not disclosed; only position type &amp; P/L are shown.</p>
   <div class="grid" id="botstats"></div>
-  <table id="botpos"><thead><tr><th>Venue</th><th>Ticker</th><th>Side</th><th class="r">Qty</th><th class="r">Entry</th><th class="r">Last</th><th class="r">P/L $</th><th class="r">P/L %</th></tr></thead><tbody></tbody></table>
+  <table id="botpos"><thead><tr><th>Type</th><th>Side</th><th class="r">P/L $</th><th class="r">P/L %</th></tr></thead><tbody></tbody></table>
   <div class="muted" style="margin-top:16px;font-size:12.5px"><b style="color:#c4cfde">Weekly performance — target +10% and beyond</b> (uncapped, no halting; gains protected by per-position trailing stops). Week-to-date P/L and drawdown from each venue's peak:</div>
   <table id="botguards"><thead><tr><th>Venue</th><th class="r">Weekly P/L</th><th class="r">From peak</th><th>Status</th></tr></thead><tbody></tbody></table>
   <div class="gloss">
@@ -64,7 +64,7 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
   </div>
 </div>
 
-<div class="foot">auto-refreshes every 60s · live data · the trading system runs real &amp; test capital; the research engine is monitor-only</div>
+<div class="foot">auto-refreshes every 60s · live data · all capital is simulated (paper / demo / testnet); research engine is monitor-only</div>
 </div>
 <script>
 const URL="https://adamrkuhkooygjngqkqh.supabase.co";
@@ -92,7 +92,8 @@ async function load(){
  h+=card("P&L 7d","$"+f(b.pnl_7d),sign(b.pnl_7d));
  h+=card("Open P/L (unrealized)",plc(openpl),sign(openpl));
  h+=card("Futures Gate",b.futures_gate||"–");
- for(const [k,v] of Object.entries(bal)){h+=card(k,"$"+f(v))}
+ const modes={"Alpaca (stk+opt)":"paper","Binance spot":"testnet","Binance futures":"testnet","OANDA":"demo"};
+ for(const [k,v] of Object.entries(bal)){h+=card(k+(modes[k]?" ("+modes[k]+")":""),"$"+f(v))}
  document.getElementById("botstats").innerHTML=h;
  let g=b.guards||{}; if(typeof g==="string"){try{g=JSON.parse(g)}catch(e){g={}}}
  const vmap={alpaca:"Stocks / Options",binance_spot:"Crypto spot",binance_futures:"Futures",oanda:"FX"};
@@ -102,7 +103,7 @@ async function load(){
    return `<tr><td>${vmap[k]||k}</td><td class="r ${sign(wr)}">${(wr>=0?'+':'')+(wr*100).toFixed(1)}%</td><td class="r ${dd<0?'red':'muted'}">${(dd*100).toFixed(1)}%</td><td>${st}</td></tr>`;
  }).join("");
  document.querySelector("#botguards tbody").innerHTML=gh||`<tr><td colspan=4 class=muted>initializing — populates after each venue's next scan</td></tr>`;
- document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
+ document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.ticker||''}</span></td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
  document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.data_days)+" d")+card("Signals processed",f(m.signals))+card("Status",m.status||"Monitoring");
  document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
