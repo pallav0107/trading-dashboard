@@ -23,6 +23,10 @@ th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--bd);font-si
 th{color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase}
 td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;background:#1f2733}
 .muted{color:var(--mut)}.verdict{background:#2a1417;border:1px solid #5c1f22;color:#ffb4ad;border-radius:8px;padding:10px 12px;font-size:13px}
+.action{border-radius:10px;padding:14px 16px;font-size:14px;margin-bottom:10px}
+.action .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;opacity:.85}
+.act-buy{background:#0f2a16;border:1px solid #1f5c2a;color:#b6f0c2}
+.act-hold{background:#2a2410;border:1px solid #5c4f1f;color:#f0e3b6}
 .gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:18px}
 .gloss b{color:#c4cfde}.gloss div{margin:4px 0}
 .foot{color:var(--mut);font-size:11px;margin-top:24px;text-align:center}
@@ -39,6 +43,7 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 <div class="panel active" id="panel-moon">
   <h2>Moonshot — Convexity Research</h2>
   <p class="desc">A research sleeve asking one question: can we spot, ahead of time, a stock about to move <i>far more</i> than the options market expects (an explosive / "black-swan" move)? It is <b>research only — not trading real money</b>. Every signal must beat the market's own implied probability on out-of-sample data before it could ever be funded.</p>
+  <div id="msaction"></div>
   <div id="msverdict"></div>
   <div class="grid" id="msstats" style="margin-top:12px"></div>
   <div class="muted" style="margin-top:14px;font-size:12.5px"><b style="color:#c4cfde">Explosive candidates</b> — tickers the model flags as more likely than usual to make an outsized move (shown only if they clear the edge bar):</div>
@@ -47,6 +52,7 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
   <table id="mstick"><thead><tr><th>Ticker</th><th>As of</th><th class="r">ATM IV</th><th class="r">IV rank</th><th class="r">GEX</th></tr></thead><tbody></tbody></table>
   <div class="gloss">
     <div><b>What the terms mean</b></div>
+    <div><b>Recommended action:</b> the bottom-line instruction derived from the verdict — either BUY a specific convexity trade, or STAND ASIDE. Only flips to BUY when a candidate beats the market's implied odds out-of-sample.</div>
     <div><b>Verdict:</b> the research system's honest call — does the convexity signal have a real, tradeable edge, or is the market priced fairly?</div>
     <div><b>Bronze / Silver / Gold:</b> the data pipeline stages — raw captured data → cleaned &amp; labelled features → the ranked shortlist of explosive candidates.</div>
     <div><b>P(explosive):</b> model-estimated probability a ticker makes an outsized move before its options expire.</div>
@@ -103,7 +109,16 @@ async function load(){
  document.getElementById("botstats").innerHTML=h;
  document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><span class="pill">${p.venue||''}</span></td><td>${p.ticker||''}</td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
  const m=(ms&&ms[0])||{};
- document.getElementById("msverdict").innerHTML=m.verdict?`<div class="verdict"><b>Verdict:</b> ${m.verdict}</div>`:"";
+ const cand=(mg||[]).map(g=>g.ticker);
+ const isPass=/^\s*PASS/i.test(m.verdict||"");
+ let act,acls;
+ if(isPass&&cand.length){
+   act=`<b>BUY — long convexity.</b> Open a long straddle (or long at-the-money options) on: <b>${cand.join(", ")}</b>. The model rates these above the market's implied odds of an explosive move.`;acls="act-buy";
+ }else{
+   act=`<b>STAND ASIDE — take no positions.</b> The research finds no tradeable edge here: buying options is negative-EV (you would lose money on average). Any tickers listed below are <b>watch-only</b>, not buy signals.`;acls="act-hold";
+ }
+ document.getElementById("msaction").innerHTML=`<div class="action ${acls}"><div class="k">Recommended action</div>${act}</div>`;
+ document.getElementById("msverdict").innerHTML=m.verdict?`<div class="verdict"><b>Why:</b> ${m.verdict}</div>`:"";
  document.getElementById("msstats").innerHTML=card("Bronze days",f(m.bronze_days))+card("Silver rows",f(m.silver_rows))+card("Gold candidates",f(m.gold_candidates))+card("As of",m.as_of||"–");
  document.querySelector("#msgold tbody").innerHTML=(mg||[]).map(g=>`<tr><td><b>${g.ticker}</b></td><td class="r">${f2(g.p_explosive)}</td><td class="r">${f2(g.explosive_score)}</td><td class="r">${f2(g.iv_rank)}</td></tr>`).join("")||`<tr><td colspan=4 class=muted>no candidates clear the edge bar — current verdict: no real edge</td></tr>`;
  const tk=(mt||[]).sort((a,b)=>(b.as_of||"").localeCompare(a.as_of||"")).slice(0,20);
