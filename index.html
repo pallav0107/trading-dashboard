@@ -30,10 +30,16 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 .gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:18px}
 .gloss b{color:#c4cfde}.gloss div{margin:4px 0}
 .foot{color:var(--mut);font-size:11px;margin-top:24px;text-align:center}
+.macro{display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:11px 16px;margin-bottom:16px}
+.macro .mi{display:flex;flex-direction:column}.macro .mk{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.macro .mv{font-weight:600;font-size:14px}
+.regpill{font-weight:700;font-size:13px;padding:3px 12px;border-radius:20px}
+.ron{background:#0f2a16;border:1px solid #1f5c2a;color:#3fb950}.roff{background:#2a1417;border:1px solid #5c1f22;color:#f85149}
 </style></head><body><div class="wrap">
 <h1>Trading & Research Dashboard</h1>
 <div class="sub" id="stamp">loading…</div>
 <div class="intro">A live operations view of an <b>autonomous trading system</b> running across five markets, alongside a quantitative <b>research engine</b>. Live data, refreshed every minute. Proprietary methods and signals are not disclosed. Nothing here is financial advice.</div>
+
+<div class="macro" id="macrostrip"></div>
 
 <div class="tabs">
   <button class="tab active" data-tab="moon">🔬 Research</button>
@@ -83,7 +89,20 @@ const plp=n=>n==null?"–":(n>=0?"+":"")+f2(n)+"%";
 const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
 function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
 async function load(){
- const [bs,bp,ms]=await Promise.all([get("bot_status"),get("bot_positions"),get("research_status")]);
+ const [bs,bp,ms,mac]=await Promise.all([get("bot_status"),get("bot_positions"),get("research_status"),get("macro_status")]);
+ const mk=(mac&&mac[0])||{};
+ if(mk.regime){
+   const ron=mk.regime==="RISK-ON";
+   document.getElementById("macrostrip").innerHTML=
+     `<span class="regpill ${ron?'ron':'roff'}">${mk.regime}</span>`+
+     `<div class="mi"><span class="mk">Net Liquidity</span><span class="mv">$${(mk.net_liquidity_b/1000).toFixed(2)}T</span></div>`+
+     `<div class="mi"><span class="mk">4wk change</span><span class="mv ${(mk.nl_change_4wk_b>=0)?'ron':'roff'}" style="background:none;border:none;padding:0">${mk.nl_change_4wk_b>=0?'+':''}$${mk.nl_change_4wk_b}B</span></div>`+
+     `<div class="mi"><span class="mk">M2 YoY</span><span class="mv">${mk.m2_yoy_pct}%</span></div>`+
+     `<div class="mi"><span class="mk">US 10Y</span><span class="mv">${mk.us10y}%</span></div>`+
+     `<div class="mi"><span class="mk">10Y-2Y</span><span class="mv">${mk.yield_curve_10y2y}%</span></div>`+
+     `<div class="mi"><span class="mk">HY spread</span><span class="mv">${mk.hy_credit_spread}%</span></div>`+
+     `<div class="mi" style="margin-left:auto"><span class="mk">macro liquidity regime · FRED</span><span class="mk">public data</span></div>`;
+ }
  const b=(bs&&bs[0])||{};
  let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
  const openpl=(bp||[]).reduce((s,p)=>s+(p.pl||0),0);
