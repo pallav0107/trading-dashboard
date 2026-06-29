@@ -73,8 +73,6 @@ td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-rad
 
 <div class="panel" id="panel-bets">
   <h2>Moonshot Lottery</h2>
-  <div class="grid" id="betstats"></div>
-  <table id="betstbl"><thead><tr><th>Name</th><th>Type</th><th>Regime</th><th class="r">Qty</th><th class="r">Cost</th><th class="r">Value</th><th class="r">Multiple</th></tr></thead><tbody></tbody></table>
   <div class="muted" style="margin-top:20px;font-size:12.5px"><b style="color:#c4cfde">Illustrative backtest — daily right-sized tickets (Jan 2026→now)</b> &nbsp;(hypothetical &middot; paper &middot; outcomes only)</div>
   <div class="grid">
     <div class="card"><div class="k">Tickets</div><div class="v">1,037</div></div>
@@ -142,8 +140,6 @@ async function load(){
  const m=(ms&&ms[0])||{};
  document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.data_days)+" d")+card("Signals processed",f(m.signals))+card("Status",m.status||"Monitoring");
 const bst=(betst&&betst[0])||{};
- document.getElementById("betstats").innerHTML=card("Open bets",f(bst.open_bets))+card("Deployed","$"+f(bst.cost))+card("Current value","$"+f(bst.value))+card("Open P/L",plc(bst.open_pl),sign(bst.open_pl))+card("Realized P/L",plc(bst.realized_pl),sign(bst.realized_pl))+card("Regime",bst.mode||"–");
- document.querySelector("#betstbl tbody").innerHTML=(bets||[]).sort((a,b)=>(b.mult||0)-(a.mult||0)).map(x=>`<tr><td><b>${x.underlying}</b></td><td class="${x.kind==='put'?'red':'grn'}">${(x.kind||'').toUpperCase()}</td><td class="muted">${x.mode||''}</td><td class="r">${x.qty}</td><td class="r">$${f(x.cost)}</td><td class="r">$${f(x.value)}</td><td class="r ${x.mult>=1?'grn':'muted'}">${f2(x.mult)}x</td></tr>`).join("")||`<tr><td colspan=7 class=muted>no open bets (standing down or awaiting entry)</td></tr>`;
  document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
 }
 load();setInterval(load,60000);
