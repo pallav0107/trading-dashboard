@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Malamaal Weekly · Play</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --ground:#130E1C;--panel:#1D1628;--panel2:#251C34;--edge:#342843;
+  --ink:#F7F1E6;--muted:#AEA4BC;--faint:#7C7190;
+  --gold:#F1C24C;--gold-deep:#A87B1E;--gold-soft:rgba(241,194,76,.13);
+  --hot:#F0508E;--win:#3FC894;--lose:#E56A55;--dead:#6B6076;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){:root{--ground:#F5EEE1;--panel:#FFF;--panel2:#FBF6EC;--edge:#E7DCC7;
+  --ink:#241B12;--muted:#6E6152;--faint:#9A8B77;--gold:#B7860F;--gold-deep:#8A6410;--gold-soft:rgba(183,134,15,.1);
+  --hot:#D5326F;--win:#0E9E6E;--lose:#C24A34;--dead:#B3A794;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.brand{font-weight:900;letter-spacing:.1em;font-size:clamp(22px,4vw,34px);
+  background:linear-gradient(180deg,var(--gold),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand small{display:block;font:600 10px var(--mono);letter-spacing:.3em;color:var(--hot);-webkit-text-fill-color:var(--hot)}
+.auth{display:flex;align-items:center;gap:12px}
+.chip{background:var(--panel);border:1px solid var(--gold-deep);border-radius:20px;padding:7px 14px;font:700 13px var(--mono);color:var(--gold)}
+.btn{border:0;border-radius:9px;padding:9px 15px;font:700 13px var(--sans);cursor:pointer;background:var(--gold);color:#20160a}
+.btn:hover{filter:brightness(1.07)}.btn.ghost{background:transparent;border:1px solid var(--edge);color:var(--muted)}
+.btn:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+.g{display:inline-flex;align-items:center;gap:9px;background:#fff;color:#3c4043;border:1px solid #dadce0;
+  border-radius:9px;padding:10px 16px;font:600 14px var(--sans);cursor:pointer}
+.hero{text-align:center;background:radial-gradient(120% 140% at 50% -20%,var(--gold-soft),transparent 60%),var(--panel);
+  border:2px solid var(--gold-deep);border-radius:16px;padding:34px 22px;margin:14px 0}
+.hero p{color:var(--muted);max-width:48ch;margin:12px auto 20px;line-height:1.55}
+h2{display:flex;align-items:center;gap:11px;margin:26px 0 12px;font:700 12px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+h2::after{content:"";flex:1;height:1px;background:var(--edge)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px}
+.tk{position:relative;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 15px;overflow:hidden}
+.tk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+.tk .r1{display:flex;justify-content:space-between;align-items:baseline}
+.tk .nm{font-weight:800;font-size:17px}
+.side{font:700 9px var(--mono);letter-spacing:.08em;padding:3px 6px;border-radius:5px}
+.side.CALL{background:rgba(63,200,148,.14);color:var(--win)}.side.PUT{background:rgba(229,106,85,.15);color:var(--lose)}
+.tk .meta{font-family:var(--mono);color:var(--muted);font-size:11.5px;margin-top:3px}
+.tk .buy{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed var(--edge)}
+.tk .cost{font-family:var(--mono);font-weight:700}.tk .cost small{color:var(--faint);font-weight:400}
+.status{font:700 8.5px var(--mono);padding:3px 7px;border-radius:20px;text-transform:uppercase}
+.LIVE{background:rgba(63,200,148,.12);color:var(--win)}.WON{background:var(--gold-soft);color:var(--gold)}
+.EXPIRED,.DEAD{background:rgba(107,96,118,.18);color:var(--dead)}
+table{width:100%;border-collapse:collapse;font:600 13px var(--mono)}
+th{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-align:right;padding:8px 10px;border-bottom:1px solid var(--edge)}
+th:first-child,td:first-child{text-align:left}
+td{padding:9px 10px;border-bottom:1px solid var(--edge)}
+tr:last-child td{border-bottom:none}
+.me{color:var(--gold)}.rank{color:var(--faint)}
+.lead{background:var(--panel);border:1px solid var(--edge);border-radius:13px;padding:6px 8px}
+.honest{margin-top:26px;background:var(--panel2);border:1px solid var(--edge);border-left:3px solid var(--hot);border-radius:12px;padding:15px 18px;color:var(--muted);font-size:13px;line-height:1.6}
+.honest b{color:var(--ink)}
+.empty{background:var(--panel);border:1px dashed var(--edge);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+footer{margin-top:22px;text-align:center;color:var(--faint);font:500 11px var(--mono)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">MALAMAAL WEEKLY<small>PLAY MONEY · WIN NOTHING REAL</small></div>
+    <div class="auth" id="auth"></div>
+  </div>
+
+  <div id="signedout">
+    <div class="hero">
+      <div style="font-size:40px">🤑🎰</div>
+      <h1 style="margin:6px 0;font-size:26px">Get $1,000 in chips. Buy long-shot tickets. Climb the board.</h1>
+      <p>Sign in with Google and you're in the game with <b style="color:var(--gold)">$1,000 fake chips</b>. Buy cheap lottery tickets on real stocks at real prices — most turn to dust, but one 100× hit rockets you up the leaderboard. It's all pretend money. Bragging rights only.</p>
+      <button class="g" id="signin"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6.1C12.2 13.5 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.8-.8-4.3s.3-3 .8-4.3l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8.1 2.1-6.4 0-11.8-4-13.6-9.6l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg> Sign in with Google</button>
+    </div>
+  </div>
+
+  <div id="signedin" class="hide">
+    <h2>Today's Tickets <span id="menuc" class="rank"></span></h2>
+    <div class="grid" id="menu"></div>
+    <h2>Your Tickets</h2>
+    <div class="grid" id="mine"></div>
+    <h2>🏆 Leaderboard</h2>
+    <div class="lead"><table id="board"><thead><tr><th>#</th><th>Player</th><th>Chips</th><th>Open Bets</th><th>Net Worth</th></tr></thead><tbody id="brows"></tbody></table></div>
+  </div>
+
+  <div class="honest"><b>This is a game.</b> Every chip is pretend. Nothing here is real money, a real trade, or investment advice — it's cheap-option lottery tickets scored against real market prices, purely for fun and bragging rights. Expect to lose most tickets; that's the whole joke. 🎲</div>
+  <footer>Malamaal Weekly · play money · not investment advice</footer>
+</div>
+
+<script>
+const SUPA_URL="https://adamrkuhkooygjngqkqh.supabase.co", SUPA_KEY="sb_publishable_U04JOYhi8RrxXBLt5P9tqg_PKj6ZxOA";
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const $=id=>document.getElementById(id);
+const fmt=n=>"$"+Math.round(n).toLocaleString();
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const draw=e=>{const d=new Date(e+"T00:00:00");return MON[d.getMonth()]+" "+d.getDate();};
+let ME=null;
+$("signin").onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href.split("#")[0]}});
+async function signout(){await sb.auth.signOut();location.reload();}
+sb.auth.onAuthStateChange((_e,s)=>render(s));
+sb.auth.getSession().then(({data})=>render(data.session));
+
+async function render(session){
+  if(!session){ $("signedout").classList.remove("hide"); $("signedin").classList.add("hide"); $("auth").innerHTML=""; return; }
+  ME=session.user.id;
+  $("signedout").classList.add("hide"); $("signedin").classList.remove("hide");
+  await loadAll();
+}
+async function loadAll(){
+  const [{data:prof},{data:menu},{data:bets}]=await Promise.all([
+    sb.from("profiles").select("id,handle,balance"),
+    sb.from("ticket_menu").select("*").order("ask"),
+    sb.from("bets").select("uid,sym,u,cp,strike,exp,stake,qty,value,status").order("placed_at",{ascending:false})
+  ]);
+  const me=(prof||[]).find(p=>p.id===ME)||{handle:"you",balance:0};
+  $("auth").innerHTML=`<span class="chip">🪙 ${fmt(me.balance)}</span><button class="btn ghost" onclick="signout()">Sign out</button>`;
+  // menu
+  $("menuc").textContent=menu&&menu.length?("· "+menu.length):"";
+  $("menu").innerHTML=(menu&&menu.length)? menu.map(m=>`
+    <div class="tk"><div class="r1"><span class="nm">${m.u}</span><span class="side ${m.cp}">${m.cp}</span></div>
+    <div class="meta">$${m.strike} · draw ${draw(m.exp)}</div>
+    <div class="buy"><span class="cost">${fmt(m.ask*100)} <small>/ ticket</small></span>
+    <button class="btn" onclick="buy('${m.sym}')">Buy</button></div></div>`).join("")
+    : `<div class="empty">No tickets on the menu yet — new draws post after the next market open. 🎰</div>`;
+  // my bets
+  const mine=(bets||[]).filter(b=>b.uid===ME);
+  $("mine").innerHTML=mine.length? mine.map(b=>`
+    <div class="tk"><div class="r1"><span class="nm">${b.u}</span><span class="status ${b.status}">${b.status}</span></div>
+    <div class="meta">${b.cp} $${b.strike} · ${draw(b.exp)} · ${b.qty}x</div>
+    <div class="buy"><span class="cost">${fmt(b.value)} <small>now</small></span><span class="cost" style="color:var(--faint)">${fmt(b.stake)} in</span></div></div>`).join("")
+    : `<div class="empty">You haven't bought a ticket yet — grab one above. 🎟️</div>`;
+  // leaderboard: net worth = balance + open bet value
+  const openVal={}; (bets||[]).forEach(b=>{ if(b.status==="LIVE") openVal[b.uid]=(openVal[b.uid]||0)+(b.value||0); });
+  const rows=(prof||[]).map(p=>({...p,open:openVal[p.id]||0,net:(p.balance||0)+(openVal[p.id]||0)})).sort((a,b)=>b.net-a.net);
+  $("brows").innerHTML=rows.map((r,i)=>`<tr class="${r.id===ME?'me':''}"><td class="rank">${i+1}</td><td>${r.handle}${r.id===ME?' (you)':''}</td><td>${fmt(r.balance)}</td><td>${fmt(r.open)}</td><td>${fmt(r.net)}</td></tr>`).join("");
+}
+async function buy(sym){
+  const qty=1;
+  const {error}=await sb.rpc("place_bet",{p_sym:sym,p_qty:qty});
+  if(error){ alert(error.message==="insufficient balance"?"Not enough chips for that one!":error.message); return; }
+  await loadAll();
+}
+window.signout=signout; window.buy=buy;
+</script>
+</body>
+</html>
