@@ -117,9 +117,9 @@ const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 const fmt=n=>"$"+Math.round(n).toLocaleString();
 const drawLabel=e=>{const d=new Date(e+"T00:00:00");return MON[d.getMonth()]+" "+d.getDate();};
 function card(t){
-  const dead=t.status==="DEAD"; const prize=fmt(t.stake*100); let live="";
+  const dead=t.status==="DEAD"||t.status==="EXPIRED"; const prize=fmt(t.stake*100); let live="";
   if(t.status==="LIVE") live=`<div class="live-val ${t.plpc>=0?'up':'down'}">now ${fmt(t.value)} · ${t.plpc>0?'+':''}${t.plpc}%</div>`;
-  if(dead) live=`<div class="live-val down">expired · $0</div>`;
+  if(dead) live=`<div class="live-val down">expired · ${fmt(t.value||0)}</div>`;
   return `<div class="tk ${dead?'dead':''}">
     <span class="pill ${t.status}">${t.status==='QUEUED'?'new':t.status}</span>
     <div class="row1"><span class="name">${t.u}</span><span class="side ${t.cp}">${t.cp}</span></div>
@@ -142,14 +142,16 @@ async function load(){
     return;
   }
   const news=rows.filter(t=>t.status==="QUEUED");
-  const lives=rows.filter(t=>t.status==="LIVE").concat(rows.filter(t=>t.status==="DEAD"));
-  const alive=rows.filter(t=>t.status!=="DEAD");
+  const lives=rows.filter(t=>t.status==="LIVE");
+  const inplay=news.concat(lives);
+  const expired=rows.filter(t=>t.status==="EXPIRED"||t.status==="DEAD").sort((a,b)=>(b.exp||"").localeCompare(a.exp||""));
+  const alive=inplay;
   body.innerHTML=`
-    <h2>Today's Fresh Draws <span class="cnt">· ${news.length}</span></h2>
-    <div class="grid">${news.map(card).join("")||'<div class="empty">No fresh picks queued right now.</div>'}</div>
-    <h2>Still In Play <span class="cnt">· ${lives.length}</span></h2>
-    <div class="grid">${lives.map(card).join("")}</div>
-    <h2>The Result So Far</h2>
+    <h2>In Play <span class="cnt">· ${inplay.length}</span></h2>
+    <div class="grid">${inplay.map(card).join("")||'<div class="empty">Nothing in play right now — fresh draws post after the next market open. 🎰</div>'}</div>
+    <h2>Expired · Last 30 Days <span class="cnt">· ${expired.length}</span></h2>
+    <div class="grid">${expired.map(card).join("")||'<div class="empty">No expired tickets in the last 30 days yet.</div>'}</div>
+    <h2>The Result · Last 30 Days</h2>
     <div class="result">
       <div class="rtile"><div class="n" id="r-stake">–</div><div class="l">Settled Stake</div></div>
       <div class="rtile"><div class="n" id="r-value">–</div><div class="l">Worth Now</div></div>
@@ -163,7 +165,7 @@ async function load(){
   document.getElementById("s-stake").textContent=fmt(totalStake);
   document.getElementById("s-prize").textContent=fmt(topPrize);
   document.getElementById("s-new").textContent=news.length;
-  const settled=rows.filter(t=>t.status==="LIVE"||t.status==="DEAD");
+  const settled=rows.filter(t=>t.status==="LIVE"||t.status==="DEAD"||t.status==="EXPIRED");
   const stakeS=settled.reduce((a,t)=>a+t.stake,0), valueS=settled.reduce((a,t)=>a+(t.value||0),0);
   const pnl=valueS-stakeS, pct=stakeS?Math.round(100*pnl/stakeS):0;
   const deadN=settled.filter(t=>(t.value||0)<=0).length, aliveN=settled.length-deadN;
