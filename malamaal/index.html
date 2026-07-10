@@ -18,44 +18,51 @@
   --ink:#241B12;--muted:#6E6152;--faint:#9A8B77;--gold:#B7860F;--gold-deep:#8A6410;--gold-soft:rgba(183,134,15,.1);
   --hot:#D5326F;--win:#0E9E6E;--lose:#C24A34;--dead:#B3A794;}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 .wrap{max-width:1000px;margin:0 auto;padding:26px 20px 60px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:8px}
-.brand{font-weight:900;letter-spacing:.1em;font-size:clamp(22px,4vw,34px);
-  background:linear-gradient(180deg,var(--gold),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand{font-weight:900;letter-spacing:.1em;font-size:clamp(22px,4vw,34px);background:linear-gradient(180deg,var(--gold),var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand small{display:block;font:600 10px var(--mono);letter-spacing:.3em;color:var(--hot);-webkit-text-fill-color:var(--hot)}
 .auth{display:flex;align-items:center;gap:12px}
 .chip{background:var(--panel);border:1px solid var(--gold-deep);border-radius:20px;padding:7px 14px;font:700 13px var(--mono);color:var(--gold)}
 .btn{border:0;border-radius:9px;padding:9px 15px;font:700 13px var(--sans);cursor:pointer;background:var(--gold);color:#20160a}
 .btn:hover{filter:brightness(1.07)}.btn.ghost{background:transparent;border:1px solid var(--edge);color:var(--muted)}
+.btn.mini{padding:4px 10px;font-size:11px}.btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
-.g{display:inline-flex;align-items:center;gap:9px;background:#fff;color:#3c4043;border:1px solid #dadce0;
-  border-radius:9px;padding:10px 16px;font:600 14px var(--sans);cursor:pointer}
-.hero{text-align:center;background:radial-gradient(120% 140% at 50% -20%,var(--gold-soft),transparent 60%),var(--panel);
-  border:2px solid var(--gold-deep);border-radius:16px;padding:34px 22px;margin:14px 0}
-.hero p{color:var(--muted);max-width:48ch;margin:12px auto 20px;line-height:1.55}
+.g{display:inline-flex;align-items:center;gap:9px;background:#fff;color:#3c4043;border:1px solid #dadce0;border-radius:9px;padding:10px 16px;font:600 14px var(--sans);cursor:pointer}
+.hero{text-align:center;background:radial-gradient(120% 140% at 50% -20%,var(--gold-soft),transparent 60%),var(--panel);border:2px solid var(--gold-deep);border-radius:16px;padding:34px 22px;margin:14px 0}
+.hero p{color:var(--muted);max-width:50ch;margin:12px auto 20px;line-height:1.55}
 h2{display:flex;align-items:center;gap:11px;margin:26px 0 12px;font:700 12px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
-h2::after{content:"";flex:1;height:1px;background:var(--edge)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:11px}
-.tk{position:relative;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 15px;overflow:hidden}
-.tk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+h2::after{content:"";flex:1;height:1px;background:var(--edge)}.rank{color:var(--faint)}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+@media(max-width:720px){.tiers{grid-template-columns:repeat(2,1fr)}}
+.tier{background:var(--panel);border:1px solid var(--edge);border-top:3px solid var(--tc);border-radius:12px;padding:15px}
+.tname{font-weight:800;font-size:17px;color:var(--tc)}
+.tmult{font:800 23px var(--mono);margin:1px 0 6px}
+.tdesc{color:var(--muted);font-size:11.5px;line-height:1.45;min-height:52px}
+.tbuy{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11px;color:var(--faint)}
+.amt{width:66px;background:var(--panel2);border:1px solid var(--edge);color:var(--ink);border-radius:6px;padding:6px 7px;font:600 12px var(--mono)}
+.tbuy .btn{margin-left:auto;padding:6px 13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px}
+.tk{position:relative;background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 15px;overflow:hidden;--tc:var(--gold)}
+.tk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc)}
 .tk .r1{display:flex;justify-content:space-between;align-items:baseline}
-.tk .nm{font-weight:800;font-size:17px}
-.side{font:700 9px var(--mono);letter-spacing:.08em;padding:3px 6px;border-radius:5px}
-.side.CALL{background:rgba(63,200,148,.14);color:var(--win)}.side.PUT{background:rgba(229,106,85,.15);color:var(--lose)}
+.tk .nm{font-weight:800;font-size:17px;color:var(--tc)}
 .tk .meta{font-family:var(--mono);color:var(--muted);font-size:11.5px;margin-top:3px}
-.tk .buy{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed var(--edge)}
-.tk .cost{font-family:var(--mono);font-weight:700}.tk .cost small{color:var(--faint);font-weight:400}
 .status{font:700 8.5px var(--mono);padding:3px 7px;border-radius:20px;text-transform:uppercase}
 .LIVE{background:rgba(63,200,148,.12);color:var(--win)}.WON{background:var(--gold-soft);color:var(--gold)}
 .EXPIRED,.DEAD{background:rgba(107,96,118,.18);color:var(--dead)}
+.tk .live-val{font-family:var(--mono);font-size:12px;margin-top:9px}
+.up{color:var(--win)}.down{color:var(--lose)}
+.tk .buy{display:flex;justify-content:space-between;align-items:center;margin-top:11px;padding-top:9px;border-top:1px dashed var(--edge)}
+.tk .cost{font-family:var(--mono);font-weight:700}
+.legs{margin-top:9px;border-top:1px dashed var(--edge);padding-top:8px;display:flex;flex-direction:column;gap:5px}
+.leg{display:flex;justify-content:space-between;font:600 11.5px var(--mono);color:var(--muted);gap:8px}
 table{width:100%;border-collapse:collapse;font:600 13px var(--mono)}
 th{font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);text-align:right;padding:8px 10px;border-bottom:1px solid var(--edge)}
 th:first-child,td:first-child{text-align:left}
-td{padding:9px 10px;border-bottom:1px solid var(--edge)}
-tr:last-child td{border-bottom:none}
-.me{color:var(--gold)}.rank{color:var(--faint)}
+td{padding:9px 10px;border-bottom:1px solid var(--edge)}tr:last-child td{border-bottom:none}
+.me{color:var(--gold)}
 .lead{background:var(--panel);border:1px solid var(--edge);border-radius:13px;padding:6px 8px}
 .honest{margin-top:26px;background:var(--panel2);border:1px solid var(--edge);border-left:3px solid var(--hot);border-radius:12px;padding:15px 18px;color:var(--muted);font-size:13px;line-height:1.6}
 .honest b{color:var(--ink)}
@@ -74,22 +81,22 @@ footer{margin-top:22px;text-align:center;color:var(--faint);font:500 11px var(--
   <div id="signedout">
     <div class="hero">
       <div style="font-size:40px">🤑🎰</div>
-      <h1 style="margin:6px 0;font-size:26px">Get $1,000 in chips. Buy long-shot tickets. Climb the board.</h1>
-      <p>Sign in with Google and you're in the game with <b style="color:var(--gold)">$1,000 fake chips</b>. Buy long-shot tickets on real stocks — roughly <b style="color:var(--gold)">1-in-10 to win something</b>, with a <b style="color:var(--gold)">1000× jackpot</b> if one truly moons. Most turn to dust. It's all pretend money — bragging rights only.</p>
+      <h1 style="margin:6px 0;font-size:26px">Get $1,000 in chips. Pick a tier. Chase the jackpot.</h1>
+      <p>Sign in with Google for <b style="color:var(--gold)">$1,000 fake chips</b>. Buy one ticket in a tier — <b>Bronze 10×, Silver 100×, Gold 1000×, Platinum 10000×</b> — and your stake spreads across a basket of real stocks (NVDA, GOOGL, and friends). Deeper tier = bigger jackpot, worse odds. All pretend money. Bragging rights only.</p>
       <button class="g" id="signin"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6.1C12.2 13.5 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.8-.8-4.3s.3-3 .8-4.3l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8.1 2.1-6.4 0-11.8-4-13.6-9.6l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg> Sign in with Google</button>
     </div>
   </div>
 
   <div id="signedin" class="hide">
-    <h2>Today's Tickets <span id="menuc" class="rank"></span></h2>
-    <div class="grid" id="menu"></div>
-    <h2>Your Tickets</h2>
+    <h2>Pick a Tier</h2>
+    <div class="tiers" id="tiers"></div>
+    <h2>Your Tickets <span id="minec" class="rank"></span></h2>
     <div class="grid" id="mine"></div>
     <h2>🏆 Leaderboard</h2>
-    <div class="lead"><table id="board"><thead><tr><th>#</th><th>Player</th><th>Chips</th><th>Open Bets</th><th>Net Worth</th></tr></thead><tbody id="brows"></tbody></table></div>
+    <div class="lead"><table><thead><tr><th>#</th><th>Player</th><th>Chips</th><th>Open</th><th>Net Worth</th></tr></thead><tbody id="brows"></tbody></table></div>
   </div>
 
-  <div class="honest"><b>This is a game.</b> Every chip is pretend. Nothing here is real money, a real trade, or investment advice — it's cheap-option lottery tickets scored against real market prices, purely for fun and bragging rights. Expect to lose most tickets; that's the whole joke. 🎲</div>
+  <div class="honest"><b>This is a game.</b> Every chip is pretend — no real money, no real trade, no advice. Your stake buys a basket of cheap long-shot options scored against real prices. Deeper tiers pay more but almost never hit; expect most tickets to fade. The jackpot number is the ceiling if a name truly moons, not a promise. 🎲</div>
   <footer>Malamaal Weekly · play money · not investment advice</footer>
 </div>
 
@@ -98,8 +105,13 @@ const SUPA_URL="https://adamrkuhkooygjngqkqh.supabase.co", SUPA_KEY="sb_publisha
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 const $=id=>document.getElementById(id);
 const fmt=n=>"$"+Math.round(n).toLocaleString();
-const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const draw=e=>{const d=new Date(e+"T00:00:00");return MON[d.getMonth()]+" "+d.getDate();};
+const TIERS=[
+ {key:'bronze',mult:'10×',name:'Bronze',c:'#CD7F32',odds:'best odds'},
+ {key:'silver',mult:'100×',name:'Silver',c:'#AEB6BD',odds:'long shot'},
+ {key:'gold',mult:'1000×',name:'Gold',c:'#F1C24C',odds:'moonshot'},
+ {key:'platinum',mult:'10000×',name:'Platinum',c:'#8FD4E8',odds:'black-swan lottery'},
+];
+const TC=Object.fromEntries(TIERS.map(t=>[t.key,t]));
 let ME=null;
 $("signin").onclick=()=>sb.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.href.split("#")[0]}});
 async function signout(){await sb.auth.signOut();location.reload();}
@@ -107,47 +119,53 @@ sb.auth.onAuthStateChange((_e,s)=>render(s));
 sb.auth.getSession().then(({data})=>render(data.session));
 
 async function render(session){
-  if(!session){ $("signedout").classList.remove("hide"); $("signedin").classList.add("hide"); $("auth").innerHTML=""; return; }
-  ME=session.user.id;
-  $("signedout").classList.add("hide"); $("signedin").classList.remove("hide");
-  await loadAll();
+  if(!session){$("signedout").classList.remove("hide");$("signedin").classList.add("hide");$("auth").innerHTML="";return;}
+  ME=session.user.id;$("signedout").classList.add("hide");$("signedin").classList.remove("hide");await loadAll();
 }
 async function loadAll(){
   const [{data:prof},{data:menu},{data:bets}]=await Promise.all([
     sb.from("profiles").select("id,handle,balance"),
-    sb.from("ticket_menu").select("*").order("ask"),
-    sb.from("bets").select("uid,sym,u,cp,strike,exp,stake,qty,value,status").order("placed_at",{ascending:false})
+    sb.from("ticket_menu").select("tier,u,ask"),
+    sb.from("bets").select("uid,tier,stake,value,status,legs").order("placed_at",{ascending:false})
   ]);
   const me=(prof||[]).find(p=>p.id===ME)||{handle:"you",balance:0};
   $("auth").innerHTML=`<span class="chip">🪙 ${fmt(me.balance)}</span><button class="btn ghost" onclick="signout()">Sign out</button>`;
-  // menu
-  $("menuc").textContent=menu&&menu.length?("· "+menu.length):"";
-  $("menu").innerHTML=(menu&&menu.length)? menu.map(m=>`
-    <div class="tk"><div class="r1"><span class="nm">${m.u}</span><span class="side ${m.cp}">${m.cp}</span></div>
-    <div class="meta">$${m.strike} · draw ${draw(m.exp)} · ~1:10 to win</div>
-    <div class="meta" style="color:var(--gold);font-weight:700">1000× jackpot → ${fmt(m.ask*100*1000)}</div>
-    <div class="buy"><span class="cost">${fmt(m.ask*100)} <small>/ ticket</small></span>
-    <button class="btn" onclick="buy('${m.sym}')">Buy</button></div></div>`).join("")
-    : `<div class="empty">No tickets on the menu yet — new draws post after the next market open. 🎰</div>`;
-  // my bets
+  const byTier={}; (menu||[]).forEach(m=>{(byTier[m.tier]=byTier[m.tier]||[]).push(m);});
+  $("tiers").innerHTML=TIERS.map(t=>{
+    const b=byTier[t.key]||[]; const names=[...new Set(b.map(x=>x.u))];
+    const desc=names.length?`${t.odds} · spreads across ${names.length} names<br>${names.slice(0,4).join(", ")}${names.length>4?"…":""}`:`${t.odds} · restocking…`;
+    return `<div class="tier" style="--tc:${t.c}"><div class="tname">${t.name}</div><div class="tmult">up to ${t.mult}</div>
+      <div class="tdesc">${desc}</div>
+      <div class="tbuy"><input class="amt" id="amt-${t.key}" type="number" min="10" step="10" value="400"> chips
+      <button class="btn" ${b.length?"":"disabled"} onclick="buyTier('${t.key}')">Buy</button></div></div>`;
+  }).join("");
   const mine=(bets||[]).filter(b=>b.uid===ME);
-  $("mine").innerHTML=mine.length? mine.map(b=>`
-    <div class="tk"><div class="r1"><span class="nm">${b.u}</span><span class="status ${b.status}">${b.status}</span></div>
-    <div class="meta">${b.cp} $${b.strike} · ${draw(b.exp)} · ${b.qty}x</div>
-    <div class="buy"><span class="cost">${fmt(b.value)} <small>now</small></span><span class="cost" style="color:var(--faint)">${fmt(b.stake)} in</span></div></div>`).join("")
-    : `<div class="empty">You haven't bought a ticket yet — grab one above. 🎟️</div>`;
-  // leaderboard: net worth = balance + open bet value
-  const openVal={}; (bets||[]).forEach(b=>{ if(b.status==="LIVE") openVal[b.uid]=(openVal[b.uid]||0)+(b.value||0); });
-  const rows=(prof||[]).map(p=>({...p,open:openVal[p.id]||0,net:(p.balance||0)+(openVal[p.id]||0)})).sort((a,b)=>b.net-a.net);
+  $("minec").textContent=mine.length?("· "+mine.length):"";
+  $("mine").innerHTML=mine.length?mine.map((b,i)=>ticket(b,i)).join(""):`<div class="empty">No tickets yet — pick a tier above. 🎟️</div>`;
+  const open={}; (bets||[]).forEach(b=>{if(b.status==="LIVE")open[b.uid]=(open[b.uid]||0)+(b.value||0);});
+  const rows=(prof||[]).map(p=>({...p,open:open[p.id]||0,net:(p.balance||0)+(open[p.id]||0)})).sort((a,b)=>b.net-a.net);
   $("brows").innerHTML=rows.map((r,i)=>`<tr class="${r.id===ME?'me':''}"><td class="rank">${i+1}</td><td>${r.handle}${r.id===ME?' (you)':''}</td><td>${fmt(r.balance)}</td><td>${fmt(r.open)}</td><td>${fmt(r.net)}</td></tr>`).join("");
 }
-async function buy(sym){
-  const qty=1;
-  const {error}=await sb.rpc("place_bet",{p_sym:sym,p_qty:qty});
-  if(error){ alert(error.message==="insufficient balance"?"Not enough chips for that one!":error.message); return; }
+function ticket(b,i){
+  const t=TC[b.tier]||{name:b.tier||'Ticket',mult:'',c:'#F1C24C'};
+  const pl=(b.value||0)-(b.stake||0), pct=b.stake?Math.round(100*pl/b.stake):0;
+  const legs=(b.legs||[]).map(l=>`<div class="leg"><span>${l.u} ${l.cp==='CALL'?'▲':'▼'} $${l.strike}</span><span>${fmt(l.alloc)} → <b class="${(l.value||0)>=l.alloc?'up':'down'}">${fmt(l.value||0)}</b></span></div>`).join("");
+  return `<div class="tk" style="--tc:${t.c}"><div class="r1"><span class="nm">${t.name}</span><span class="status ${b.status}">${b.status}</span></div>
+    <div class="meta">up to ${t.mult} · ${(b.legs||[]).length} names</div>
+    <div class="live-val ${pl>=0?'up':'down'}">${fmt(b.value||0)} now · ${pct>0?'+':''}${pct}%</div>
+    <div class="buy"><span class="cost" style="color:var(--faint)">${fmt(b.stake)} staked</span>
+    <button class="btn ghost mini" onclick="tog(${i})">what's inside ▾</button></div>
+    <div class="legs hide" id="legs-${i}">${legs||'<div class="leg">basket settling…</div>'}</div></div>`;
+}
+async function buyTier(key){
+  const amt=parseFloat(($("amt-"+key)||{}).value||"0");
+  if(!amt||amt<10){alert("Enter at least 10 chips");return;}
+  const {error}=await sb.rpc("buy_tier",{p_tier:key,p_stake:amt});
+  if(error){alert(error.message&&error.message.includes("insufficient")?"Not enough chips for that!":(error.message||"error"));return;}
   await loadAll();
 }
-window.signout=signout; window.buy=buy;
+function tog(i){$("legs-"+i).classList.toggle("hide");}
+window.signout=signout;window.buyTier=buyTier;window.tog=tog;
 </script>
 </body>
 </html>
