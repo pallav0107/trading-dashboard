@@ -75,7 +75,7 @@ footer{margin-top:22px;text-align:center;color:var(--faint);font:500 11px var(--
     <div class="hero">
       <div style="font-size:40px">🤑🎰</div>
       <h1 style="margin:6px 0;font-size:26px">Get $1,000 in chips. Buy long-shot tickets. Climb the board.</h1>
-      <p>Sign in with Google and you're in the game with <b style="color:var(--gold)">$1,000 fake chips</b>. Buy cheap lottery tickets on real stocks at real prices — most turn to dust, but one 100× hit rockets you up the leaderboard. It's all pretend money. Bragging rights only.</p>
+      <p>Sign in with Google and you're in the game with <b style="color:var(--gold)">$1,000 fake chips</b>. Buy long-shot tickets on real stocks — roughly <b style="color:var(--gold)">1-in-10 to win something</b>, with a <b style="color:var(--gold)">1000× jackpot</b> if one truly moons. Most turn to dust. It's all pretend money — bragging rights only.</p>
       <button class="g" id="signin"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.6 13.2l7.8 6.1C12.2 13.5 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.8-.8-4.3s.3-3 .8-4.3l-7.8-6.1C.9 16.6 0 20.2 0 24s.9 7.4 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.3-4.6 2.1-8.1 2.1-6.4 0-11.8-4-13.6-9.6l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg> Sign in with Google</button>
     </div>
   </div>
@@ -124,7 +124,8 @@ async function loadAll(){
   $("menuc").textContent=menu&&menu.length?("· "+menu.length):"";
   $("menu").innerHTML=(menu&&menu.length)? menu.map(m=>`
     <div class="tk"><div class="r1"><span class="nm">${m.u}</span><span class="side ${m.cp}">${m.cp}</span></div>
-    <div class="meta">$${m.strike} · draw ${draw(m.exp)}</div>
+    <div class="meta">$${m.strike} · draw ${draw(m.exp)} · ~1:10 to win</div>
+    <div class="meta" style="color:var(--gold);font-weight:700">1000× jackpot → ${fmt(m.ask*100*1000)}</div>
     <div class="buy"><span class="cost">${fmt(m.ask*100)} <small>/ ticket</small></span>
     <button class="btn" onclick="buy('${m.sym}')">Buy</button></div></div>`).join("")
     : `<div class="empty">No tickets on the menu yet — new draws post after the next market open. 🎰</div>`;
