@@ -1,142 +1,184 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Trading & Research Dashboard</title>
+<title>Malamaal Weekly</title>
 <style>
-:root{--bg:#0b0e14;--card:#141925;--mut:#7d8aa3;--fg:#e6edf3;--grn:#3fb950;--red:#f85149;--acc:#58a6ff;--bd:#222a39}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:20px}
-h1{font-size:21px;margin:0 0 2px}.sub{color:var(--mut);font-size:12px;margin-bottom:14px}
-.intro{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:13px;color:#c4cfde;margin-bottom:16px}
-.tabs{display:flex;gap:8px;margin-bottom:18px;border-bottom:1px solid var(--bd)}
-.tab{background:none;border:none;color:var(--mut);font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab:hover{color:var(--fg)}.tab.active{color:var(--acc);border-bottom-color:var(--acc)}
-.panel{display:none}.panel.active{display:block}
-h2{font-size:15px;margin:8px 0 6px;color:var(--acc)}
-.desc{color:var(--mut);font-size:12.5px;margin:0 0 14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
-.k{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
-.v{font-size:22px;font-weight:600;margin-top:4px}
-.grn{color:var(--grn)}.red{color:var(--red)}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--bd);font-size:13px}
-th{color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase}
-td.r,th.r{text-align:right}.pill{display:inline-block;padding:1px 8px;border-radius:20px;font-size:11px;background:#1f2733}
-.muted{color:var(--mut)}.verdict{background:#2a1417;border:1px solid #5c1f22;color:#ffb4ad;border-radius:8px;padding:10px 12px;font-size:13px}
-.action{border-radius:10px;padding:14px 16px;font-size:14px;margin-bottom:10px}
-.action .k{font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;opacity:.85}
-.act-buy{background:#0f2a16;border:1px solid #1f5c2a;color:#b6f0c2}
-.act-hold{background:#2a2410;border:1px solid #5c4f1f;color:#f0e3b6}
-.gloss{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--mut);margin-top:18px}
-.gloss b{color:#c4cfde}.gloss div{margin:4px 0}
-.foot{color:var(--mut);font-size:11px;margin-top:24px;text-align:center}
-.macro{display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:11px 16px;margin-bottom:16px}
-.macro .mi{display:flex;flex-direction:column}.macro .mk{color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.04em}.macro .mv{font-weight:600;font-size:14px}
-.regpill{font-weight:700;font-size:13px;padding:3px 12px;border-radius:20px}
-.ron{background:#0f2a16;border:1px solid #1f5c2a;color:#3fb950}.roff{background:#2a1417;border:1px solid #5c1f22;color:#f85149}
-</style></head><body><div class="wrap">
-<h1>Trading & Research Dashboard</h1>
-<div class="sub" id="stamp">loading…</div>
-<div class="intro">A live operations view of an <b>autonomous trading system</b> running across five markets, alongside a quantitative <b>research engine</b>. Live data, refreshed every minute. Proprietary methods and signals are not disclosed. Nothing here is financial advice.</div>
-
-<div class="macro" id="macrostrip"></div>
-
-<div class="tabs">
-  <button class="tab active" data-tab="moon">🔬 Research</button>
-  <button class="tab" data-tab="bot">🤖 Trading Bot</button>
-  <button class="tab" data-tab="bets">🎰 Moonshot Bets</button>
-</div>
-
-<div class="panel active" id="panel-moon">
-  <h2>Research Engine</h2>
-  <p class="desc">A proprietary quantitative research pipeline that continuously ingests market data and evaluates signals. Methodology, instruments, and any candidates are confidential and not shown here.</p>
-  <div class="grid" id="msstats"></div>
-</div>
-
-<div class="panel" id="panel-bot">
-  <h2>Live Trading Bot</h2>
-  <p class="desc">An automated multi-venue trading system. <b>All capital shown is simulated</b> — paper / demo / testnet accounts, not real money.</p>
-  <div class="grid" id="botstats"></div>
-  <table id="botpos"><thead><tr><th>Asset</th><th>Venue</th><th>Side</th><th class="r">Qty</th><th class="r">Entry</th><th class="r">Last</th><th class="r">P/L $</th><th class="r">P/L %</th></tr></thead><tbody></tbody></table>
-  <div class="muted" style="margin-top:16px;font-size:12.5px"><b style="color:#c4cfde">Weekly performance — target +10% and beyond</b> (uncapped, no halting; gains protected by per-position trailing stops). Week-to-date P/L and drawdown from each venue's peak:</div>
-  <table id="botguards"><thead><tr><th>Venue</th><th class="r">Weekly P/L</th><th class="r">From peak</th><th>Status</th></tr></thead><tbody></tbody></table>
-  <div class="gloss">
-    <div><b>What the terms mean</b></div>
-    <div><b>Total Equity:</b> the combined account value across all five venues.</div>
-    <div><b>P&amp;L Today / 7d:</b> realized profit or loss over those windows (closed trades).</div>
-    <div><b>Open P/L:</b> the unrealized profit/loss on positions still held right now.</div>
-    <div><b>P/L $ / %:</b> per-position unrealized gain/loss since entry (live, marked to last price).</div>
-    <div><b>Futures Gate (x/25):</b> the futures strategy must complete 25 paper trades and prove itself before it is allowed to trade real money.</div>
-    <div><b>Weekly performance:</b> each venue's week-to-date P/L (aiming for +10% and beyond — uncapped, no halting) and how far it sits below its weekly peak. Monitor-only; gains are protected by the bot's per-position trailing stops, not by stopping trading.</div>
+:root{
+  --ground:#130E1C; --panel:#1D1628; --panel2:#251C34; --edge:#342843;
+  --ink:#F7F1E6; --muted:#AEA4BC; --faint:#7C7190;
+  --gold:#F1C24C; --gold-deep:#A87B1E; --gold-soft:rgba(241,194,76,.13);
+  --hot:#F0508E; --win:#3FC894; --lose:#E56A55; --dead:#6B6076;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){
+  :root{--ground:#F5EEE1;--panel:#FFFFFF;--panel2:#FBF6EC;--edge:#E7DCC7;
+    --ink:#241B12;--muted:#6E6152;--faint:#9A8B77;--gold:#B7860F;--gold-deep:#8A6410;
+    --gold-soft:rgba(183,134,15,.1);--hot:#D5326F;--win:#0E9E6E;--lose:#C24A34;--dead:#B3A794;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:1020px;margin:0 auto;padding:34px 22px 64px}
+.marquee{border:2px solid var(--gold-deep);border-radius:16px;background:
+  radial-gradient(120% 140% at 50% -20%,var(--gold-soft),transparent 60%),var(--panel);
+  padding:26px 22px 22px;text-align:center;position:relative;overflow:hidden}
+.bulbs{display:flex;justify-content:center;gap:11px;margin-bottom:16px}
+.bulbs i{width:8px;height:8px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 9px 1px var(--gold);opacity:.9;animation:blink 1.4s infinite}
+.bulbs i:nth-child(2n){animation-delay:.35s}.bulbs i:nth-child(3n){animation-delay:.7s}
+.bulbs i:nth-child(4n){animation-delay:1.05s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.bulbs i{animation:none;opacity:.85}}
+h1{margin:0;font-weight:900;letter-spacing:.13em;font-size:clamp(30px,7vw,60px);line-height:1;
+  background:linear-gradient(180deg,var(--gold) 0%,var(--gold-deep) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;text-wrap:balance}
+.kick{font:600 11px/1.5 var(--mono);letter-spacing:.34em;text-transform:uppercase;color:var(--hot);margin-bottom:14px}
+.tag{color:var(--muted);font-size:14px;margin:12px auto 0;max-width:52ch;line-height:1.5}
+.asof{font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 8px}
+.stat{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 12px;text-align:center}
+.stat .n{font-weight:800;font-size:clamp(19px,3.4vw,26px);font-family:var(--mono);color:var(--gold)}
+.stat .l{font:600 9.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:5px}
+@media(max-width:620px){.stats{grid-template-columns:repeat(2,1fr)}}
+h2{display:flex;align-items:center;gap:12px;margin:30px 0 14px;
+  font:700 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+h2::after{content:"";flex:1;height:1px;background:var(--edge)}
+h2 .cnt{color:var(--gold);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.tk{position:relative;background:var(--panel);border:1px solid var(--edge);border-radius:13px;
+  padding:15px 16px 14px;overflow:hidden}
+.tk::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold)}
+.tk.dead::before{background:var(--dead)}
+.tk .row1{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.tk .name{font-weight:800;font-size:18px;letter-spacing:.02em}
+.side{font:700 9.5px var(--mono);letter-spacing:.08em;padding:3px 7px;border-radius:5px;text-transform:uppercase}
+.side.CALL{background:rgba(63,200,148,.14);color:var(--win)}
+.side.PUT{background:rgba(229,106,85,.15);color:var(--lose)}
+.tk .strike{font-family:var(--mono);color:var(--muted);font-size:12.5px;margin-top:3px}
+.tk .draw{font-family:var(--mono);color:var(--faint);font-size:11px;margin-top:2px;letter-spacing:.02em}
+.tk .money{display:flex;justify-content:space-between;align-items:flex-end;margin-top:13px;
+  padding-top:11px;border-top:1px dashed var(--edge)}
+.tk .stake .v{font-family:var(--mono);font-weight:700;font-size:15px}
+.tk .stake .k,.tk .prize .k{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:block}
+.tk .prize{text-align:right}
+.tk .prize .v{font-family:var(--mono);font-weight:800;font-size:16px;color:var(--gold)}
+.pill{position:absolute;top:12px;right:12px;font:700 8.5px var(--mono);letter-spacing:.09em;
+  padding:3px 6px;border-radius:20px;text-transform:uppercase}
+.pill.QUEUED{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-deep)}
+.pill.LIVE{background:rgba(63,200,148,.12);color:var(--win);border:1px solid var(--win)}
+.pill.DEAD{background:rgba(107,96,118,.18);color:var(--dead);border:1px solid var(--dead)}
+.tk .live-val{font-family:var(--mono);font-size:11px;margin-top:8px}
+.up{color:var(--win)}.down{color:var(--lose)}
+.result{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.rtile{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:15px 12px;text-align:center}
+.rtile .n{font-weight:800;font-size:clamp(18px,3.2vw,25px);font-family:var(--mono)}
+.rtile .l{font:600 9.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-top:5px}
+.rtile.win .n{color:var(--win)}.rtile.lose .n{color:var(--lose)}
+.rbar{position:relative;height:26px;margin-top:11px;background:var(--panel2);border:1px solid var(--edge);
+  border-radius:8px;overflow:hidden}
+.rbar-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold));border-radius:7px 0 0 7px}
+.rbar-lab{position:absolute;left:10px;top:50%;transform:translateY(-50%);font:700 11px var(--mono);color:var(--ink);z-index:2}
+@media(max-width:620px){.result{grid-template-columns:repeat(2,1fr)}}
+.honest{margin-top:30px;background:var(--panel2);border:1px solid var(--edge);border-left:3px solid var(--hot);
+  border-radius:12px;padding:16px 19px;font-size:13px;line-height:1.6;color:var(--muted)}
+.honest b{color:var(--ink)} .honest .big{color:var(--hot);font-weight:700}
+.empty{background:var(--panel);border:1px dashed var(--edge);border-radius:12px;padding:26px;text-align:center;color:var(--muted);font-size:14px}
+footer{margin-top:22px;text-align:center;color:var(--faint);font:500 11.5px var(--mono);letter-spacing:.04em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="marquee">
+    <div class="bulbs"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="kick">The People's Jackpot Board</div>
+    <h1>MALAMAAL WEEKLY</h1>
+    <p class="tag">A basket of cheap long-shot option tickets. Most turn to dust — but every ticket can pay <b style="color:var(--gold)">100×</b> or more, and it only takes one to light up the board.</p>
+    <div class="asof" id="asof">Loading the board…</div>
+  </header>
+  <div class="stats">
+    <div class="stat"><div class="n" id="s-tickets">–</div><div class="l">Tickets In Play</div></div>
+    <div class="stat"><div class="n" id="s-stake">–</div><div class="l">Total Staked</div></div>
+    <div class="stat"><div class="n" id="s-prize">–</div><div class="l">Top Prize (at 100×)</div></div>
+    <div class="stat"><div class="n" id="s-new">–</div><div class="l">Fresh Picks Today</div></div>
   </div>
-</div>
-
-<div class="panel" id="panel-bets">
-  <h2>Moonshot Lottery</h2>
-  <div class="grid" id="betstats"></div>
-  <table id="betstbl"><thead><tr><th>Name</th><th>Type</th><th>Regime</th><th class="r">Qty</th><th class="r">Cost</th><th class="r">Value</th><th class="r">Multiple</th></tr></thead><tbody></tbody></table>
-  
-</div>
-
-<div class="foot">auto-refreshes every 60s · live data · all capital is simulated (paper / demo / testnet); research engine is monitor-only</div>
+  <div id="body"></div>
+  <div class="honest">
+    <b>How to read this board.</b> This is play money on a paper account, and it is <span class="big">expected to lose</span> most days — that's the price of a lottery ticket. The board tilts toward cheap, high-payout long shots and lets winners run with <b>no cap</b>, so a single 100×–1000× hit can pay for a long run of dead tickets. Never bet money you need. <b>One ticket lighting up is the whole game; a red board is a normal day.</b>
+  </div>
+  <footer id="foot">Malamaal Weekly · paper account · bounded stake · not investment advice</footer>
 </div>
 <script>
-const URL="https://adamrkuhkooygjngqkqh.supabase.co";
-const KEY="sb_publishable_U04JOYhi8RrxXBLt5P9tqg_PKj6ZxOA";
-const H={apikey:KEY,Authorization:"Bearer "+KEY};
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
-  t.classList.add("active");document.getElementById("panel-"+t.dataset.tab).classList.add("active");
-});
-const f=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:0});
-const f2=n=>n==null?"–":Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
-const sign=n=>n==null?"":(n>=0?"grn":"red");
-const plc=n=>n==null?"–":(n>=0?"+":"")+f(n);
-const plp=n=>n==null?"–":(n>=0?"+":"")+f2(n)+"%";
-const get=t=>fetch(`${URL}/rest/v1/${t}?select=*`,{headers:H}).then(r=>r.json()).catch(_=>[]);
-function card(k,v,cls){return `<div class="card"><div class="k">${k}</div><div class="v ${cls||''}">${v}</div></div>`}
-async function load(){
- const [bs,bp,ms,mac,bets,betst]=await Promise.all([get("bot_status"),get("bot_positions"),get("research_status"),get("macro_status"),get("moonshot_bets"),get("moonshot_bets_status")]);
- const mk=(mac&&mac[0])||{};
- if(mk.regime){
-   const ron=mk.regime==="RISK-ON";
-   document.getElementById("macrostrip").innerHTML=
-     `<span class="regpill ${ron?'ron':'roff'}">${mk.regime}</span>`+
-     `<div class="mi"><span class="mk">Net Liquidity</span><span class="mv">$${(mk.net_liquidity_b/1000).toFixed(2)}T</span></div>`+
-     `<div class="mi"><span class="mk">4wk change</span><span class="mv ${(mk.nl_change_4wk_b>=0)?'ron':'roff'}" style="background:none;border:none;padding:0">${mk.nl_change_4wk_b>=0?'+':''}$${mk.nl_change_4wk_b}B</span></div>`+
-     `<div class="mi"><span class="mk">M2 YoY</span><span class="mv">${mk.m2_yoy_pct}%</span></div>`+
-     `<div class="mi"><span class="mk">US 10Y</span><span class="mv">${mk.us10y}%</span></div>`+
-     `<div class="mi"><span class="mk">10Y-2Y</span><span class="mv">${mk.yield_curve_10y2y}%</span></div>`+
-     `<div class="mi"><span class="mk">HY spread</span><span class="mv">${mk.hy_credit_spread}%</span></div>`+
-     `<div class="mi" style="margin-left:auto"><span class="mk">macro liquidity regime · FRED</span><span class="mk">public data</span></div>`;
- }
- const b=(bs&&bs[0])||{};
- let bal=b.balances||{};if(typeof bal==="string"){try{bal=JSON.parse(bal)}catch(e){bal={}}}
- const openpl=(bp||[]).reduce((s,p)=>s+(p.pl||0),0);
- let h=card("Total Equity","$"+f(b.total_equity));
- h+=card("P&L Today","$"+f(b.pnl_today),sign(b.pnl_today));
- h+=card("P&L 7d","$"+f(b.pnl_7d),sign(b.pnl_7d));
- h+=card("Open P/L (unrealized)",plc(openpl),sign(openpl));
- h+=card("Futures Gate",b.futures_gate||"–");
- const modes={"Alpaca (stk+opt)":"paper","Binance spot":"testnet","Binance futures":"testnet","OANDA":"demo"};
- for(const [k,v] of Object.entries(bal)){h+=card(k+(modes[k]?" ("+modes[k]+")":""),"$"+f(v))}
- document.getElementById("botstats").innerHTML=h;
- let g=b.guards||{}; if(typeof g==="string"){try{g=JSON.parse(g)}catch(e){g={}}}
- const vmap={alpaca:"Stocks / Options",binance_spot:"Crypto spot",binance_futures:"Futures",oanda:"FX"};
- const gh=Object.entries(g).map(([k,v])=>{
-   const wr=v.weekly_return||0, dd=v.drawdown_from_peak||0;
-   const st=v.locked?'<span class="red">LOCKED</span>':'<span class="grn">running</span>';
-   return `<tr><td>${vmap[k]||k}</td><td class="r ${sign(wr)}">${(wr>=0?'+':'')+(wr*100).toFixed(1)}%</td><td class="r ${dd<0?'red':'muted'}">${(dd*100).toFixed(1)}%</td><td>${st}</td></tr>`;
- }).join("");
- document.querySelector("#botguards tbody").innerHTML=gh||`<tr><td colspan=4 class=muted>initializing — populates after each venue's next scan</td></tr>`;
- document.querySelector("#botpos tbody").innerHTML=(bp||[]).map(p=>`<tr><td><b>${p.ticker||''}</b></td><td><span class="pill">${p.venue||''}</span></td><td class="${p.side==='short'?'red':'grn'}">${p.side||''}</td><td class="r">${f2(p.qty)}</td><td class="r">${f2(p.entry)}</td><td class="r">${f2(p.last_price)}</td><td class="r ${sign(p.pl)}">${plc(p.pl)}</td><td class="r ${sign(p.pl_pct)}">${plp(p.pl_pct)}</td></tr>`).join("")||`<tr><td colspan=8 class=muted>no open positions</td></tr>`;
- const m=(ms&&ms[0])||{};
- document.getElementById("msstats").innerHTML=card("Pipeline","Active","grn")+card("Data history",f(m.data_days)+" d")+card("Signals processed",f(m.signals))+card("Status",m.status||"Monitoring");
-const bst=(betst&&betst[0])||{};
- document.getElementById("betstats").innerHTML=card("Open bets",f(bst.open_bets))+card("Deployed","$"+f(bst.cost))+card("Current value","$"+f(bst.value))+card("Open P/L",plc(bst.open_pl),sign(bst.open_pl))+card("Realized P/L",plc(bst.realized_pl),sign(bst.realized_pl))+card("Regime",bst.mode||"–");
- document.querySelector("#betstbl tbody").innerHTML=(bets||[]).sort((a,b)=>(b.mult||0)-(a.mult||0)).map(x=>`<tr><td><b>${x.underlying}</b></td><td class="${x.kind==='put'?'red':'grn'}">${(x.kind||'').toUpperCase()}</td><td class="muted">${x.mode||''}</td><td class="r">${x.qty}</td><td class="r">$${f(x.cost)}</td><td class="r">$${f(x.value)}</td><td class="r ${x.mult>=1?'grn':'muted'}">${f2(x.mult)}x</td></tr>`).join("")||`<tr><td colspan=7 class=muted>no open bets (standing down or awaiting entry)</td></tr>`;
- document.getElementById("stamp").textContent="Updated "+new Date().toLocaleString()+(b.updated_at?" · bot data "+new Date(b.updated_at).toLocaleTimeString():"");
+const SUPA_URL="https://adamrkuhkooygjngqkqh.supabase.co", SUPA_KEY="sb_publishable_U04JOYhi8RrxXBLt5P9tqg_PKj6ZxOA";
+const H={apikey:SUPA_KEY,Authorization:"Bearer "+SUPA_KEY};
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const fmt=n=>"$"+Math.round(n).toLocaleString();
+const drawLabel=e=>{const d=new Date(e+"T00:00:00");return MON[d.getMonth()]+" "+d.getDate();};
+function card(t){
+  const dead=t.status==="DEAD"; const prize=fmt(t.stake*100); let live="";
+  if(t.status==="LIVE") live=`<div class="live-val ${t.plpc>=0?'up':'down'}">now ${fmt(t.value)} · ${t.plpc>0?'+':''}${t.plpc}%</div>`;
+  if(dead) live=`<div class="live-val down">expired · $0</div>`;
+  return `<div class="tk ${dead?'dead':''}">
+    <span class="pill ${t.status}">${t.status==='QUEUED'?'new':t.status}</span>
+    <div class="row1"><span class="name">${t.u}</span><span class="side ${t.cp}">${t.cp}</span></div>
+    <div class="strike">$${t.strike} strike</div><div class="draw">draw · ${drawLabel(t.exp)}</div>
+    ${live}<div class="money">
+      <div class="stake"><span class="k">Stake</span><span class="v">${fmt(t.stake)}</span></div>
+      <div class="prize"><span class="k">100× pays</span><span class="v">${prize}</span></div>
+    </div></div>`;
 }
-load();setInterval(load,60000);
-</script></body></html>
+async function load(){
+  let rows=[];
+  try{ rows=await fetch(`${SUPA_URL}/rest/v1/malamaal_tickets?select=*`,{headers:H}).then(r=>r.json()); }
+  catch(e){ rows=[]; }
+  if(!Array.isArray(rows)) rows=[];
+  const body=document.getElementById("body");
+  if(!rows.length){
+    document.getElementById("asof").textContent="Board warming up";
+    body.innerHTML=`<div class="empty">No tickets on the board yet — fresh draws post after the next market open. 🎰</div>`;
+    ["s-tickets","s-stake","s-prize","s-new"].forEach(i=>document.getElementById(i).textContent="0");
+    return;
+  }
+  const news=rows.filter(t=>t.status==="QUEUED");
+  const lives=rows.filter(t=>t.status==="LIVE").concat(rows.filter(t=>t.status==="DEAD"));
+  const alive=rows.filter(t=>t.status!=="DEAD");
+  body.innerHTML=`
+    <h2>Today's Fresh Draws <span class="cnt">· ${news.length}</span></h2>
+    <div class="grid">${news.map(card).join("")||'<div class="empty">No fresh picks queued right now.</div>'}</div>
+    <h2>Still In Play <span class="cnt">· ${lives.length}</span></h2>
+    <div class="grid">${lives.map(card).join("")}</div>
+    <h2>The Result So Far</h2>
+    <div class="result">
+      <div class="rtile"><div class="n" id="r-stake">–</div><div class="l">Settled Stake</div></div>
+      <div class="rtile"><div class="n" id="r-value">–</div><div class="l">Worth Now</div></div>
+      <div class="rtile" id="r-pnl-tile"><div class="n" id="r-pnl">–</div><div class="l">Net P&amp;L</div></div>
+      <div class="rtile"><div class="n" id="r-tally">–</div><div class="l">Alive / Dead</div></div>
+    </div>
+    <div class="rbar"><div class="rbar-fill" id="rbar"></div><span class="rbar-lab" id="rbar-lab"></span></div>`;
+  const totalStake=alive.reduce((a,t)=>a+t.stake,0);
+  const topPrize=alive.length?Math.max(...alive.map(t=>t.stake*100)):0;
+  document.getElementById("s-tickets").textContent=alive.length;
+  document.getElementById("s-stake").textContent=fmt(totalStake);
+  document.getElementById("s-prize").textContent=fmt(topPrize);
+  document.getElementById("s-new").textContent=news.length;
+  const settled=rows.filter(t=>t.status==="LIVE"||t.status==="DEAD");
+  const stakeS=settled.reduce((a,t)=>a+t.stake,0), valueS=settled.reduce((a,t)=>a+(t.value||0),0);
+  const pnl=valueS-stakeS, pct=stakeS?Math.round(100*pnl/stakeS):0;
+  const deadN=settled.filter(t=>(t.value||0)<=0).length, aliveN=settled.length-deadN;
+  document.getElementById("r-stake").textContent=fmt(stakeS);
+  document.getElementById("r-value").textContent=fmt(valueS);
+  const pnlEl=document.getElementById("r-pnl"); pnlEl.textContent=(pnl>=0?"+":"−")+fmt(Math.abs(pnl))+" ("+(pct>0?"+":"")+pct+"%)";
+  document.getElementById("r-pnl-tile").classList.add(pnl>=0?"win":"lose");
+  document.getElementById("r-tally").textContent=aliveN+" / "+deadN;
+  const keepPct=stakeS?Math.max(0,Math.min(100,100*valueS/stakeS)):0;
+  document.getElementById("rbar").style.width=keepPct.toFixed(0)+"%";
+  document.getElementById("rbar-lab").textContent=fmt(valueS)+" of "+fmt(stakeS)+" staked still standing";
+  const asof=rows[0].as_of||"";
+  document.getElementById("asof").textContent=asof?("Board as of "+drawLabel(asof)+", "+new Date(asof+"T00:00:00").getFullYear()):"";
+}
+load();
+</script>
+</body>
+</html>
