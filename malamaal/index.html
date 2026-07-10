@@ -125,7 +125,7 @@ async function render(session){
 async function loadAll(){
   const [{data:prof},{data:menu},{data:bets}]=await Promise.all([
     sb.from("profiles").select("id,handle,balance"),
-    sb.from("ticket_menu").select("tier,u,ask"),
+    sb.from("ticket_menu").select("tier,u,cp,strike,ask"),
     sb.from("bets").select("uid,tier,stake,value,status,legs").order("placed_at",{ascending:false})
   ]);
   const me=(prof||[]).find(p=>p.id===ME)||{handle:"you",balance:0};
@@ -133,11 +133,14 @@ async function loadAll(){
   const byTier={}; (menu||[]).forEach(m=>{(byTier[m.tier]=byTier[m.tier]||[]).push(m);});
   $("tiers").innerHTML=TIERS.map(t=>{
     const b=byTier[t.key]||[]; const names=[...new Set(b.map(x=>x.u))];
-    const desc=names.length?`${t.odds} · spreads across ${names.length} names<br>${names.slice(0,4).join(", ")}${names.length>4?"…":""}`:`${t.odds} · restocking…`;
+    const desc=names.length?`${t.odds} · spreads your stake across ${names.length} names`:`${t.odds} · restocking…`;
+    const basket=b.map(x=>`<div class="leg"><span>${x.u} <b style="color:${x.cp==='CALL'?'var(--win)':'var(--lose)'}">${x.cp==='CALL'?'▲ CALL':'▼ PUT'}</b></span><span>$${x.strike} · ${fmt(x.ask*100)}</span></div>`).join("");
     return `<div class="tier" style="--tc:${t.c}"><div class="tname">${t.name}</div><div class="tmult">up to ${t.mult}</div>
       <div class="tdesc">${desc}</div>
       <div class="tbuy"><input class="amt" id="amt-${t.key}" type="number" min="10" step="10" value="400"> chips
-      <button class="btn" ${b.length?"":"disabled"} onclick="buyTier('${t.key}')">Buy</button></div></div>`;
+      <button class="btn" ${b.length?"":"disabled"} onclick="buyTier('${t.key}')">Buy</button></div>
+      ${b.length?`<button class="btn ghost mini" style="margin-top:9px;width:100%" onclick="tog('tier-${t.key}')">peek inside ▾ (${b.length})</button>
+      <div class="legs hide" id="legs-tier-${t.key}">${basket}</div>`:""}</div>`;
   }).join("");
   const mine=(bets||[]).filter(b=>b.uid===ME);
   $("minec").textContent=mine.length?("· "+mine.length):"";
